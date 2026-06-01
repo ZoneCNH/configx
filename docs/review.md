@@ -2,6 +2,20 @@
 
 Use this checklist when reviewing the applied baselib template against the `configx` goal.
 
+## 2026-06-01 template/foundation review notes
+
+- `docs/goal.md` is preserved as the source of truth; template application must
+  update supporting docs and harness checks without overwriting it.
+- `internal/foundationx` is a narrow compatibility module, not a full copy of
+  `/tmp/configx-foundationx`; see `docs/foundationx-compatibility.md`.
+- `configx` keeps explicit loading semantics: env files, JSON files, and
+  `/home/k8s/secrets/env/*` paths are read only when the caller passes a
+  concrete source/path.
+- Boundary validation must reject generated `x.go` files, `x.go` dependencies,
+  and infrastructure driver dependencies before release evidence is accepted.
+- Secret evidence must use redacted values only; do not call `Reveal()` in
+  validation logs, examples, manifests, or documentation output.
+
 ## Boundary checks
 
 - [ ] `go.mod` module is `github.com/bytechainx/configx`.

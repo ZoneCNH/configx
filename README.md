@@ -75,5 +75,6 @@ GOWORK=off ./scripts/check_secrets.sh
 - [Goal](docs/goal.md): authoritative product and acceptance criteria.
 - [API](docs/api.md): public configuration API and contracts.
 - [Config](docs/config.md): source, merge, decode, validation, and sanitization rules.
+- [foundationx compatibility](docs/foundationx-compatibility.md): local compatibility boundary and upgrade rule.
 - [Testing](docs/testing.md): unit, contract, race, boundary, security, and release evidence gates.
 - [Release](docs/release.md): release manifest and evidence requirements.

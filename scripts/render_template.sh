@@ -102,9 +102,6 @@ replace_in_text_files() {
   )
 }
 
-replace_in_text_files 'configx' "$module_name"
-replace_in_text_files 'github.com/bytechainx/configx' "$module_path"
-replace_in_text_files 'configx' "$package_name"
 replace_in_text_files 'github.com/bytechainx/configx' "$module_path"
 replace_in_text_files 'configx' "$module_name"
 replace_in_text_files 'configx' "$package_name"
