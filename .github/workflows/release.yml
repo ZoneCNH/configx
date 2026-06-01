@@ -1,0 +1,32 @@
+name: Release Check
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  release-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+
+      - name: Install golangci-lint
+        run: go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.1.6
+
+      - name: Install govulncheck
+        run: go install golang.org/x/vuln/cmd/govulncheck@latest
+
+      - name: Release Check
+        run: GOWORK=off make release-check
+
+      - name: Upload Manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-manifest
+          path: release/manifest/latest.json

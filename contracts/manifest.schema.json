@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "configx release manifest",
+  "type": "object",
+  "required": ["module", "version", "commit", "tree_state", "checks", "contracts", "artifacts"],
+  "properties": {
+    "module": { "const": "github.com/bytechainx/configx" },
+    "version": { "type": "string" },
+    "commit": { "type": "string" },
+    "tree_state": { "enum": ["clean", "dirty"] },
+    "checks": { "type": "object" },
+    "contracts": { "type": "array" },
+    "dependencies": { "type": "array" },
+    "tools": { "type": "object" },
+    "artifacts": { "type": "array" },
+    "notes": { "type": "object" }
+  },
+  "additionalProperties": true
+}

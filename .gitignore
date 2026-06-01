@@ -24,6 +24,13 @@ profile.cov
 go.work
 go.work.sum
 
+# Generated release evidence
+release/manifest/latest.json
+
+# Local OMX/team runtime state
+.omx/
+.worktree/
+
 # env file
 .env
 

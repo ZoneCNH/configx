@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "configx error envelope",
+  "type": "object",
+  "required": ["kind", "op", "message", "retryable"],
+  "properties": {
+    "kind": {
+      "enum": [
+        "auth",
+        "config",
+        "conflict",
+        "connection",
+        "internal",
+        "rate_limit",
+        "timeout",
+        "unavailable",
+        "validation"
+      ]
+    },
+    "op": { "type": "string" },
+    "message": { "type": "string" },
+    "retryable": { "type": "boolean" }
+  },
+  "additionalProperties": false
+}
