@@ -1,41 +1,23 @@
 # foundationx compatibility boundary
 
-`configx` depends on `github.com/bytechainx/foundationx` through the local
-replacement module in `internal/foundationx`. This keeps the config library
-buildable while preserving the public `foundationx.SecretString` contract used
-by callers.
+`configx` 通过 `internal/foundationx` 中的 local replacement module 依赖 `github.com/bytechainx/foundationx`。这让 config library 保持可构建，同时保留调用方使用的 public `foundationx.SecretString` contract。
 
 ## Compatibility scope
 
-The local module intentionally mirrors only the foundation API required by
-`configx`:
+local module 只刻意镜像 `configx` 所需的 foundation API：
 
-- `SecretString`, `NewSecretString`, `Reveal`, redacted string/text/JSON
-  formatting, `Sanitize`, and `IsZero`
-- minimal typed errors used by configx error wrapping
+- `SecretString`、`NewSecretString`、`Reveal`、redacted string/text/JSON formatting、`Sanitize` 和 `IsZero`
+- configx error wrapping 使用的最小 typed errors
 
-Reference modules such as `/tmp/configx-foundationx` also include health,
-lifecycle, retry, clock, and version contracts. Those APIs are not re-exported
-or used by `configx` unless a configx feature imports them and adds matching
-tests. This prevents template drift from pulling infrastructure behavior into a
-base configuration library.
+`/tmp/configx-foundationx` 等 reference modules 还包含 health、lifecycle、retry、clock 和 version contracts。除非某个 configx feature import 这些 API 并添加匹配 tests，否则这些 API 不会由 `configx` re-export 或使用。这样可防止 template drift 把 infrastructure behavior 拉入基础配置库。
 
 ## Non-negotiable boundaries
 
-- `docs/goal.md` remains the authoritative contract and must not be rewritten by
-  template application work.
-- Config loading stays explicit: callers create loaders and pass every source or
-  path. The library must not auto-discover `.env`, `production.yaml`,
-  `config.local.yaml`, or `/home/k8s/secrets/env/*`.
-- The module must not contain generated `x.go` files and must not import `x.go`
-  or infrastructure driver packages such as Redis, Kafka, PostgreSQL, TDengine,
-  or object-storage SDKs.
-- Validation evidence, examples, release manifests, and documentation must use
-  sanitized secret output only.
+- `docs/goal.md` 保持 authoritative contract，template application work 不得重写它。
+- Config loading 保持显式：调用方创建 loaders，并传入每个 source 或 path。library 不得 auto-discover `.env`、`production.yaml`、`config.local.yaml` 或 `/home/k8s/secrets/env/*`。
+- module 不得包含生成的 `x.go` files，也不得 import `x.go` 或 Redis、Kafka、PostgreSQL、TDengine、object-storage SDKs 等 infrastructure driver packages。
+- Validation evidence、examples、release manifests 和 documentation 只能使用 sanitized secret output。
 
 ## Upgrade rule
 
-When replacing the local module with an upstream foundationx release, first
-prove that `SecretString` redaction, `Sanitize`, `IsZero`, JSON/text marshaling,
-and configx error behavior remain unchanged with `GOWORK=off go test ./...` and
-the boundary, contract, and secret scanners.
+将 local module 替换为 upstream foundationx release 前，必须先用 `GOWORK=off go test ./...` 以及 boundary、contract、secret scanners 证明 `SecretString` redaction、`Sanitize`、`IsZero`、JSON/text marshaling 和 configx error behavior 保持不变。
