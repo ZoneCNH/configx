@@ -5,6 +5,7 @@
 ### 治理
 
 - 升级 GitHub Actions 官方 action 到 Node.js 24 运行时版本，消除 Node.js 20 deprecation 注记。
+- 固定 workflow 安装的 `govulncheck` 版本，避免 `@latest` 漂移到要求更高 Go toolchain 的版本。
 
 ## v0.1.0 - 2026-06-01
 
