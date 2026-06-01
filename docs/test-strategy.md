@@ -234,7 +234,7 @@ golden result
 compatibility result
 ```
 
-## 8. Breaking Change Policy
+## 8. Breaking Change Policy（破坏性变更策略）
 
 以下变更必须标记 breaking change：
 

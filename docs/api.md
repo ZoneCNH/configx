@@ -19,20 +19,20 @@
 
 每个 source 都通过 `SourceReport` 报告 `Name`、`Kind`、可选 `Path`、已加载 key 和 sanitized errors。
 
-## Decode and validation
+## Decode 与 validation
 
-`Decode(result, &target)` 根据 `config` tags 填充 exported struct fields。支持的 tags：
+`Decode(result, &target)` 根据 `config` tags 填充导出的 struct fields。支持的 tags：
 
 - `config:"KEY"`：`LoadResult` 中的 key name。
 - `default:"value"`：key 缺失时使用的 default。
 - `required:"true"`：key 缺失时产生 validation error。
 - `config:"-"`：跳过该 field。
 
-支持的 field types 包括 strings、booleans、有符号和无符号 integers、floats、`time.Duration`、`SecretString`，以及实现 `encoding.TextUnmarshaler` 的类型。如果 target 实现 `Validate() error`，`Decode` 会在 field assignment 后运行它。
+支持的 field types 包括 strings、booleans、有符号和无符号 integers、floats、`time.Duration`、`SecretString`，以及实现 `encoding.TextUnmarshaler` 的类型。如果 target 实现 `Validate() error`，`Decode` 会在字段赋值后运行它。
 
 ## Sanitization
 
-`LoadResult.Sanitize()` 返回 `SanitizedResult`，其中 secret values 被 redacted 为 `***`。包含 secret、password、passwd、token、access_key 或 secret_key 的 keys 会被视为 secrets；`NewSecretMapSource` 可以显式标记额外 key。`SecretString.String()` 和 text marshaling 均返回 redacted 输出。
+`LoadResult.Sanitize()` 返回 `SanitizedResult`，其中 secret values 会脱敏为 `***`。包含 secret、password、passwd、token、access_key 或 secret_key 的 keys 会被视为 secrets；`NewSecretMapSource` 可以显式标记额外 key。`SecretString.String()` 与 text marshaling 均返回脱敏输出。
 
 ## Baseline contracts
 
@@ -44,4 +44,4 @@
 - `Metrics` hooks 和名称由 `contracts/metrics.md` 锁定。
 - `Version` 和 `ModuleName` 用于 release evidence。
 
-包不得 import `x.go`，不得创建 global config state，也不得添加 driver dependencies。
+包不得 import `x.go`，不得创建全局 config state，也不得添加 driver dependencies。

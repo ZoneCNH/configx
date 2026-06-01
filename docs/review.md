@@ -1,13 +1,13 @@
-# configx template application review
+# configx template application review（模板应用复盘）
 
 评审已应用的 baselib template 与 `configx` goal 是否一致时，使用本 checklist。
 
-## 2026-06-01 template/foundation review notes
+## 2026-06-01 template/foundation review notes（复盘记录）
 
-- `docs/goal.md` 保留为 source of truth；template application 必须更新 supporting docs 和 harness checks，但不得覆盖它。
+- `docs/goal.md` 保留为 source of truth；template application 必须更新 supporting docs 与 harness checks，但不得覆盖它。
 - `internal/foundationx` 是窄 compatibility module，不是 `/tmp/configx-foundationx` 的完整副本；参见 `docs/foundationx-compatibility.md`。
-- `configx` 保持 explicit loading semantics：只有在调用方传入具体 source/path 时，才读取 env files、JSON files 和 `/home/k8s/secrets/env/*` paths。
-- Boundary validation 必须在 release evidence 被接受前拒绝生成的 `x.go` files、`x.go` dependencies 和 infrastructure driver dependencies。
+- `configx` 保持 explicit loading semantics：只有在调用方传入具体 source/path 时，才读取 env files、JSON files 与 `/home/k8s/secrets/env/*` paths。
+- Boundary validation 必须在 release evidence 被接受前拒绝生成的 `x.go` files、`x.go` dependencies 与 infrastructure driver dependencies。
 - Secret evidence 只能使用 redacted values；不得在 validation logs、examples、manifests 或 documentation output 中调用 `Reveal()`。
 
 ## Boundary checks
@@ -28,12 +28,12 @@
 
 ## Secret-safety checks
 
-- [ ] Secret values 在 stringers、errors、logs、tests、examples 和 release manifests 中 redacted。
-- [ ] Secret tests 包含 raw secret material 不存在的 negative assertions。
-- [ ] Release evidence 只记录 sanitized contract hashes 和 tool output。
+- [ ] Secret values 在 stringers、errors、logs、tests、examples 与 release manifests 中 redacted。
+- [ ] Secret tests 包含原始 secret material 不存在的 negative assertions。
+- [ ] Release evidence 只记录 sanitized contract hashes 与 tool output。
 
 ## Documentation checks
 
 - [ ] README 指向 `docs/goal.md` 作为 authoritative source。
 - [ ] Examples 只展示 explicit caller-owned paths。
-- [ ] Release documentation 要求 evidence 和 secret scanning。
+- [ ] Release documentation 要求 evidence 与 secret scanning。
