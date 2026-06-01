@@ -1,6 +1,6 @@
 # configx examples
 
-这些 examples 描述预期的 caller-owned 用法。它们避免 package globals 和 implicit discovery。
+这些 examples 描述预期的 caller-owned 用法。它们避免 package globals 与 implicit discovery。
 
 ## 显式 env file path
 
@@ -21,7 +21,7 @@ if err := configx.Decode(result, &cfg); err != nil {
 
 path 由 application 提供。`configx` 不得自行搜索该 directory。
 
-## Map override precedence
+## Map override precedence（覆盖优先级）
 
 ```go
 loader := configx.NewLoader()
@@ -31,7 +31,7 @@ result, err := loader.
     Load(ctx)
 ```
 
-当实现选择这种 ordering convention 时，后面的 sources 具有更高 precedence；merge trace 必须让被选中的 value 和 source 可见。
+当实现选择这种 ordering convention 时，后面的 sources 具有更高 precedence；merge trace 必须让被选中的 value 与 source 可见。
 
 ## Sanitized diagnostics
 
@@ -40,4 +40,4 @@ safe := configx.Sanitize(result)
 logger.Info("config loaded", "config", safe)
 ```
 
-Secrets 必须渲染为 redacted placeholders，绝不能输出 raw credential material。
+Secrets 必须渲染为 redacted placeholders，绝不能输出原始 credential material。

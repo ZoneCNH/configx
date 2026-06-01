@@ -552,7 +552,7 @@ func NewAllEnvSource(prefix string, opts ...SourceOption) *EnvSource
 AllEnvSource 可能读入不相关敏感环境变量，生产慎用。
 ```
 
-## 8.5 Env File Source
+## 8.5 Env File Source（env 文件 source）
 
 文件：
 
@@ -595,7 +595,7 @@ EMPTY=
 6. 不在错误中输出 secret value
 ```
 
-## 8.6 JSON File Source
+## 8.6 JSON File Source（JSON 文件 source）
 
 文件：
 
@@ -663,7 +663,7 @@ x.go 启动层适配
 ```
 
 
-# 9. Merge / Decode / Validate / Secret
+# 9. Merge / Decode / Validate / Secret（合并、解码、校验与密钥）
 
 ## 9.1 Merge
 
@@ -1013,7 +1013,7 @@ AC-REQ-CONFIGX-012-006: release manifest 生成
 PLAN-GOAL-20260601-CONFIGX-001-v1.0
 ```
 
-## Phase 0：Context Recovery
+## Phase 0：Context Recovery（上下文恢复）
 
 目标：
 
@@ -1051,7 +1051,7 @@ scripts/*
 .agent/*
 ```
 
-## Phase 2：Core Sources
+## Phase 2：Core Sources（核心 source）
 
 实现：
 
@@ -1063,7 +1063,7 @@ JSONFileSource
 MapSource
 ```
 
-## Phase 3：Merge + Result
+## Phase 3：Merge + Result（合并与结果）
 
 实现：
 
@@ -1074,7 +1074,7 @@ MergeStrategy
 source trace
 ```
 
-## Phase 4：Decode + Validate
+## Phase 4：Decode + Validate（解码与校验）
 
 实现：
 
@@ -1084,7 +1084,7 @@ required/default/secret tag
 Validator
 ```
 
-## Phase 5：Secret + Sanitize + Error
+## Phase 5：Secret + Sanitize + Error（密钥、脱敏与错误）
 
 实现：
 
@@ -1094,7 +1094,7 @@ SanitizedResult
 错误归一
 ```
 
-## Phase 6：Examples + TestKit
+## Phase 6：Examples + TestKit（示例与 TestKit）
 
 实现：
 
@@ -1115,7 +1115,7 @@ examples
 evidence gates
 ```
 
-## Phase 8：Docs + ADR
+## Phase 8：Docs + ADR（文档与 ADR）
 
 补齐：
 
@@ -1579,13 +1579,13 @@ go fmt ./...
 go vet ./...
 ```
 
-## Gate 3：Unit Test
+## Gate 3：Unit Test（单元测试）
 
 ```bash
 go test ./...
 ```
 
-## Gate 4：Race Test
+## Gate 4：Race Test（竞态测试）
 
 ```bash
 go test -race ./...
