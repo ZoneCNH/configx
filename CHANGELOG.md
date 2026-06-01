@@ -2,7 +2,9 @@
 
 ## 未发布
 
-- 暂无。
+### 治理
+
+- 升级 GitHub Actions 官方 action 到 Node.js 24 运行时版本，消除 Node.js 20 deprecation 注记。
 
 ## v0.1.0 - 2026-06-01
 
