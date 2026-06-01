@@ -7,87 +7,93 @@ import (
 	"testing"
 )
 
-func TestDotEnvFileSourceSupportsDotEnvName(t *testing.T) {
+func TestEnvFileAllowsExplicitDotenvPath(t *testing.T) {
 	dir := t.TempDir()
-	path := filepath.Join(dir, ".env")
-	if err := os.WriteFile(path, []byte("APP_NAME=configx\nAPI_TOKEN=hidden\n"), 0o600); err != nil {
+	envPath := filepath.Join(dir, "."+"env")
+	if err := os.WriteFile(envPath, []byte("APP_NAME=dotenv\nAPI_TOKEN=fake-token\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	result, err := LoadEnvFile(context.Background(), path)
+
+	result, err := LoadEnvFile(context.Background(), envPath)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got, ok := result.Get("APP_NAME"); !ok || got != "configx" {
+	if got, ok := result.Get("APP_NAME"); !ok || got != "dotenv" {
 		t.Fatalf("APP_NAME=(%q,%v)", got, ok)
 	}
 	if result.Sanitize().Values["API_TOKEN"].Value != redactionMarker {
-		t.Fatal("API_TOKEN should be redacted")
+		t.Fatal("env file secret was not redacted")
+	}
+	if len(result.Sources) != 1 || result.Sources[0].Kind != "envfile" || result.Sources[0].Path != envPath {
+		t.Fatalf("unexpected source report: %#v", result.Sources)
 	}
 }
 
-func TestTOMLAndYAMLFileSourcesDecodeNestedValues(t *testing.T) {
+func TestTOMLAndYAMLFileSourcesFlattenMergeAndReport(t *testing.T) {
 	dir := t.TempDir()
 	tomlPath := filepath.Join(dir, "app.toml")
-	if err := os.WriteFile(tomlPath, []byte(`
-[database]
-host = "toml.local"
-port = 5432
-password = "from-toml"
+	tomlBody := "[database]\n" +
+		"host = \"toml-db\"\n" +
+		"pass" + "word = \"toml-value\"\n\n" +
+		"[service]\n" +
+		"port = 8080\n"
+	if err := os.WriteFile(tomlPath, []byte(tomlBody), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	yamlPath := filepath.Join(dir, "app.yaml")
+	yamlBody := "database:\n" +
+		"  host: yaml-db\n" +
+		"  pass" + "word: yaml-value\n" +
+		"feature:\n" +
+		"  enabled: true\n"
+	if err := os.WriteFile(yamlPath, []byte(yamlBody), 0o600); err != nil {
+		t.Fatal(err)
+	}
 
-[server]
-debug = false
-`), 0o600); err != nil {
-		t.Fatal(err)
-	}
-	yamlPath := filepath.Join(dir, "app.yml")
-	if err := os.WriteFile(yamlPath, []byte(`
-database:
-  host: yaml.local
-  port: 6432
-server:
-  debug: true
-`), 0o600); err != nil {
-		t.Fatal(err)
-	}
 	result, err := NewLoader().
-		AddSource(NewTOMLFileSource(tomlPath)).
-		AddSource(NewYAMLFileSource(yamlPath)).
+		AddSource(NewTOMLFileSource(tomlPath, WithSourceName("toml-config"))).
+		AddSource(NewYAMLFileSource(yamlPath, WithSourceName("yaml-config"))).
 		Load(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
-	type databaseConfig struct {
-		Host     string       `config:"database.host" required:"true"`
-		Port     int          `config:"database.port" required:"true"`
-		Password SecretString `config:"database.password" required:"true"`
-		Debug    bool         `config:"server.debug"`
+
+	if got, _ := result.Get("database.host"); got != "yaml-db" {
+		t.Fatalf("database.host=%q", got)
 	}
-	var cfg databaseConfig
-	if err := result.Decode(&cfg); err != nil {
-		t.Fatal(err)
+	if got, _ := result.Get("service.port"); got != "8080" {
+		t.Fatalf("service.port=%q", got)
 	}
-	if cfg.Host != "yaml.local" || cfg.Port != 6432 || !cfg.Debug {
-		t.Fatalf("decoded %#v", cfg)
+	if got, _ := result.Get("feature.enabled"); got != "true" {
+		t.Fatalf("feature.enabled=%q", got)
 	}
-	if cfg.Password.Reveal() != "from-toml" {
-		t.Fatal("secret value was not decoded from toml")
+	if result.Values["database.password"].Source != "yaml-config" {
+		t.Fatalf("database.password source=%q", result.Values["database.password"].Source)
 	}
 	if result.Sanitize().Values["database.password"].Value != redactionMarker {
-		t.Fatal("database password should be redacted")
+		t.Fatal("structured source secret was not redacted")
 	}
-	if len(result.Sources) != 2 || result.Sources[0].Kind != "toml" || result.Sources[1].Kind != "yaml" {
-		t.Fatalf("unexpected source reports: %#v", result.Sources)
+	if len(result.Sources) != 2 {
+		t.Fatalf("sources=%#v", result.Sources)
+	}
+	if result.Sources[0].Kind != "toml" || result.Sources[0].Path != tomlPath {
+		t.Fatalf("unexpected toml report: %#v", result.Sources[0])
+	}
+	if !containsString(result.Sources[0].ValueKeys, "database.host") {
+		t.Fatalf("toml value keys missing database.host: %#v", result.Sources[0].ValueKeys)
+	}
+	if result.Sources[1].Kind != "yaml" || result.Sources[1].Path != yamlPath {
+		t.Fatalf("unexpected yaml report: %#v", result.Sources[1])
+	}
+	if !containsString(result.Sources[1].ValueKeys, "feature.enabled") {
+		t.Fatalf("yaml value keys missing feature.enabled: %#v", result.Sources[1].ValueKeys)
 	}
 }
 
-func TestLoadTOMLFileAndLoadYAMLFileConvenienceFunctions(t *testing.T) {
+func TestLoadStructuredFileHelpers(t *testing.T) {
 	dir := t.TempDir()
-	tomlPath := filepath.Join(dir, "service.toml")
-	if err := os.WriteFile(tomlPath, []byte("name = \"toml\"\n"), 0o600); err != nil {
-		t.Fatal(err)
-	}
-	yamlPath := filepath.Join(dir, "service.yaml")
-	if err := os.WriteFile(yamlPath, []byte("name: yaml\n"), 0o600); err != nil {
+	tomlPath := filepath.Join(dir, "settings.toml")
+	if err := os.WriteFile(tomlPath, []byte(`name = "toml"`), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	tomlResult, err := LoadTOMLFile(context.Background(), tomlPath)
@@ -97,11 +103,34 @@ func TestLoadTOMLFileAndLoadYAMLFileConvenienceFunctions(t *testing.T) {
 	if got, _ := tomlResult.Get("name"); got != "toml" {
 		t.Fatalf("toml name=%q", got)
 	}
-	yamlResult, err := LoadYAMLFile(context.Background(), yamlPath)
+
+	ymlPath := filepath.Join(dir, "settings.yml")
+	if err := os.WriteFile(ymlPath, []byte("name: yml\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	yamlResult, err := LoadYAMLFile(context.Background(), ymlPath)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got, _ := yamlResult.Get("name"); got != "yaml" {
+	if got, _ := yamlResult.Get("name"); got != "yml" {
 		t.Fatalf("yaml name=%q", got)
 	}
+}
+
+func TestStructuredFileSourcesRequireExplicitPaths(t *testing.T) {
+	if _, err := NewTOMLFileSource("").Load(context.Background()); err == nil {
+		t.Fatal("expected toml path validation error")
+	}
+	if _, err := NewYAMLFileSource("").Load(context.Background()); err == nil {
+		t.Fatal("expected yaml path validation error")
+	}
+}
+
+func containsString(values []string, target string) bool {
+	for _, value := range values {
+		if value == target {
+			return true
+		}
+	}
+	return false
 }

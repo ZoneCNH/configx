@@ -4,7 +4,7 @@
 
 ## 来源规则
 
-1. 不做隐式配置发现：库永不搜索 `.env`、`config.json`、home directory、working directory 或其他默认路径。
+1. 不做隐式配置发现：库永不搜索 `.env`、`config.json`、`config.toml`、`config.yaml`、home directory、working directory 或其他默认路径。
 2. 不使用全局状态：loaders 是通过 `NewLoader` 创建的普通值。
 3. Source 顺序确定：后面的 sources 覆盖前面的 sources。
 4. 每次 load 都在 `SourceReport` 中记录 source 证据，且不暴露 secret 值。
@@ -15,7 +15,9 @@
 
 ## 文件
 
-`NewEnvFileSource(path)` 和 `NewJSONFileSource(path)` 要求调用方提供路径。它们不会推断路径名称，也不会遍历父目录。
+`NewEnvFileSource(path)`、`NewJSONFileSource(path)`、`NewTOMLFileSource(path)` 和 `NewYAMLFileSource(path)` 要求调用方提供路径。它们不会推断路径名称，也不会遍历父目录。
+
+JSON、TOML 和 YAML 文件 source 会用点号展开嵌套 key，例如 `database.host`。YAML 与 YML 文件使用同一个显式 source，扩展名不改变加载规则。
 
 ## 解码
 
