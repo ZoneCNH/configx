@@ -1,4 +1,4 @@
-# configx 完整可执行 Goal Prompt v1.0
+# configx 完整可执行目标提示（Goal Prompt）v1.0
 
 > 文件名：`configx_goal_executable_prompt_v1_0.md`  
 > 目标模块：`github.com/bytechainx/configx`  
@@ -33,7 +33,7 @@
 
 ---
 
-# 1. Master Goal
+# 1. 主目标（Master Goal）
 
 ```text
 GOAL-20260601-CONFIGX-001
@@ -135,7 +135,7 @@ loader := configx.NewLoader()
 result, err := loader.AddSource(configx.NewEnvFileSource(path)).Load(ctx)
 ```
 
-## 3.4 Secret 默认不可见
+## 3.4 密钥（Secret）默认不可见
 
 所有 secret 在以下位置必须脱敏：
 
@@ -165,36 +165,36 @@ sanitized config
 | 热加载是配置库必需能力 | 会引入复杂运行时状态 | v0.1 不做 watch，后续单独设计 |
 
 
-# 5. Scope
+# 5. 范围（Scope）
 
-## 5.1 In Scope
+## 5.1 范围内（In Scope）
 
 ```text
-Source abstraction
-Named source metadata
+Source 抽象（Source abstraction）
+命名 source metadata（Named source metadata）
 Env source
 Env file source
 JSON file source
 Map source
 Multi-source loader
-Explicit source order
-Merge with precedence
-Source trace
+显式 source order（Explicit source order）
+按 precedence 合并（Merge with precedence）
+Source trace（来源追踪）
 LoadResult
 Decode into struct
 config/default/required/secret tags
-Basic type conversion
+基础 type conversion（Basic type conversion）
 Validator interface
-SecretString integration
+SecretString 集成（SecretString integration）
 Sanitized output
-Error mapping to foundationx.Error
+到 foundationx.Error 的 error mapping
 TestKit
 Examples
 Harness scripts
 Release manifest
 ```
 
-## 5.2 Optional in v0.1
+## 5.2 v0.1 可选项（Optional）
 
 ```text
 YAML source
@@ -209,7 +209,7 @@ TOML source
 不得引入全局配置框架
 ```
 
-## 5.3 Out of Scope
+## 5.3 范围外（Out of Scope）
 
 ```text
 业务配置结构
@@ -379,9 +379,9 @@ configx/
 ```
 
 
-# 8. Public API 设计
+# 8. 公共 API 设计（Public API）
 
-## 8.1 LoadResult
+## 8.1 加载结果（LoadResult）
 
 文件：
 
@@ -433,7 +433,7 @@ func (r LoadResult) Sanitize() SanitizedResult
 v0.1 不实现 MustGet，避免 panic 风格 API。
 ```
 
-## 8.2 Source Interface
+## 8.2 Source 接口（Source Interface）
 
 文件：
 
@@ -470,7 +470,7 @@ type sourceOptions struct {
 4. Source.Kind 用于调试和 evidence
 ```
 
-## 8.3 Loader
+## 8.3 加载器（Loader）
 
 文件：
 
@@ -511,7 +511,7 @@ func WithFailFast(failFast bool) Option
 5. 默认 LastWins
 ```
 
-## 8.4 Env Source
+## 8.4 环境变量 Source（Env Source）
 
 文件：
 
@@ -552,7 +552,7 @@ func NewAllEnvSource(prefix string, opts ...SourceOption) *EnvSource
 AllEnvSource 可能读入不相关敏感环境变量，生产慎用。
 ```
 
-## 8.5 Env File Source（env 文件 source）
+## 8.5 env 文件 Source（Env File Source）
 
 文件：
 
@@ -595,7 +595,7 @@ EMPTY=
 6. 不在错误中输出 secret value
 ```
 
-## 8.6 JSON File Source（JSON 文件 source）
+## 8.6 JSON 文件 Source（JSON File Source）
 
 文件：
 
@@ -633,7 +633,7 @@ postgres.host=127.0.0.1
 postgres.port=5432
 ```
 
-## 8.7 Map Source
+## 8.7 Map 来源（Map Source）
 
 文件：
 
@@ -663,9 +663,9 @@ x.go 启动层适配
 ```
 
 
-# 9. Merge / Decode / Validate / Secret（合并、解码、校验与密钥）
+# 9. 合并、解码、校验与密钥（Merge / Decode / Validate / Secret）
 
-## 9.1 Merge
+## 9.1 合并（Merge）
 
 文件：
 
@@ -697,7 +697,7 @@ func Merge(strategy MergeStrategy, maps ...Map) (Map, error)
 5. source trace 不能丢失
 ```
 
-## 9.2 Decode
+## 9.2 解码（Decode）
 
 文件：
 
@@ -755,7 +755,7 @@ map[string]T
 6. 错误信息不包含 secret value
 ```
 
-## 9.3 Validate
+## 9.3 校验（Validate）
 
 文件：
 
@@ -781,7 +781,7 @@ func Validate(target any) error
 3. Validate 不做业务领域规则推断
 ```
 
-## 9.4 Secret / Sanitize
+## 9.4 密钥与脱敏（Secret / Sanitize）
 
 文件：
 
@@ -820,7 +820,7 @@ type SanitizedValue struct {
 5. Reveal 只通过 foundationx.SecretString.Reveal
 ```
 
-## 9.5 Error Mapping
+## 9.5 错误映射（Error Mapping）
 
 文件：
 
@@ -856,7 +856,7 @@ context deadline exceeded -> ErrorKindTimeout
 ```
 
 
-# 10. Spec
+# 10. 规格（Spec）
 
 ```text
 SPEC-configx-v1.0
@@ -885,7 +885,7 @@ AC-REQ-CONFIGX-002-004: 不允许出现 Market/Macro/Regime/Trading 业务模型
 AC-REQ-CONFIGX-002-005: 不允许全局配置单例
 ```
 
-## REQ-CONFIGX-003：Source
+## REQ-CONFIGX-003：Source 契约
 
 Acceptance Criteria：
 
@@ -896,7 +896,7 @@ AC-REQ-CONFIGX-003-003: Load 支持 context
 AC-REQ-CONFIGX-003-004: SourceReport 记录来源信息
 ```
 
-## REQ-CONFIGX-004：Env Source
+## REQ-CONFIGX-004：环境变量 Source（Env Source）
 
 Acceptance Criteria：
 
@@ -907,7 +907,7 @@ AC-REQ-CONFIGX-004-003: 缺失 key 不 panic
 AC-REQ-CONFIGX-004-004: secret key 自动标记
 ```
 
-## REQ-CONFIGX-005：Env File Source
+## REQ-CONFIGX-005：env 文件 Source（Env File Source）
 
 Acceptance Criteria：
 
@@ -922,7 +922,7 @@ AC-REQ-CONFIGX-005-007: 解析错误返回 validation
 AC-REQ-CONFIGX-005-008: 不自动查找 .env
 ```
 
-## REQ-CONFIGX-006：JSON Source
+## REQ-CONFIGX-006：JSON 来源（JSON Source）
 
 Acceptance Criteria：
 
@@ -934,7 +934,7 @@ AC-REQ-CONFIGX-006-004: 非支持类型行为文档化
 AC-REQ-CONFIGX-006-005: 解析错误返回 validation
 ```
 
-## REQ-CONFIGX-007：Map Source
+## REQ-CONFIGX-007：Map 来源（Map Source）
 
 Acceptance Criteria：
 
@@ -944,7 +944,7 @@ AC-REQ-CONFIGX-007-002: 支持 secretKeys
 AC-REQ-CONFIGX-007-003: Source trace 正确
 ```
 
-## REQ-CONFIGX-008：Merge
+## REQ-CONFIGX-008：合并（Merge）
 
 Acceptance Criteria：
 
@@ -956,7 +956,7 @@ AC-REQ-CONFIGX-008-004: 覆盖关系可追踪
 AC-REQ-CONFIGX-008-005: secret 标记不丢失
 ```
 
-## REQ-CONFIGX-009：Decode
+## REQ-CONFIGX-009：解码（Decode）
 
 Acceptance Criteria：
 
@@ -971,7 +971,7 @@ AC-REQ-CONFIGX-009-007: 类型转换错误返回 validation
 AC-REQ-CONFIGX-009-008: 错误不泄露 secret value
 ```
 
-## REQ-CONFIGX-010：Validate
+## REQ-CONFIGX-010：校验（Validate）
 
 Acceptance Criteria：
 
@@ -981,7 +981,7 @@ AC-REQ-CONFIGX-010-002: Validate 调用 target.Validate
 AC-REQ-CONFIGX-010-003: Validate 错误归一或保留 cause
 ```
 
-## REQ-CONFIGX-011：Secret / Sanitize
+## REQ-CONFIGX-011：密钥与脱敏（Secret / Sanitize）
 
 Acceptance Criteria：
 
@@ -993,7 +993,7 @@ AC-REQ-CONFIGX-011-004: Release Manifest 不包含 secret 原值
 AC-REQ-CONFIGX-011-005: tests 覆盖 fmt.Sprint 不泄露
 ```
 
-## REQ-CONFIGX-012：Harness
+## REQ-CONFIGX-012：验证工具（Harness）
 
 Acceptance Criteria：
 
@@ -1007,13 +1007,13 @@ AC-REQ-CONFIGX-012-006: release manifest 生成
 ```
 
 
-# 11. Plan
+# 11. 计划（Plan）
 
 ```text
 PLAN-GOAL-20260601-CONFIGX-001-v1.0
 ```
 
-## Phase 0：Context Recovery（上下文恢复）
+## 阶段 0：上下文恢复（Context Recovery）
 
 目标：
 
@@ -1036,7 +1036,7 @@ x.go 的密钥路径是 /home/k8s/secrets/env/*
 configx 只提供显式 LoadEnvFile(path)，不自动读取
 ```
 
-## Phase 1：Skeleton
+## 阶段 1：骨架（Skeleton）
 
 创建独立仓库骨架：
 
@@ -1051,7 +1051,7 @@ scripts/*
 .agent/*
 ```
 
-## Phase 2：Core Sources（核心 source）
+## 阶段 2：核心 Source（Core Sources）
 
 实现：
 
@@ -1063,7 +1063,7 @@ JSONFileSource
 MapSource
 ```
 
-## Phase 3：Merge + Result（合并与结果）
+## 阶段 3：合并与结果（Merge + Result）
 
 实现：
 
@@ -1074,7 +1074,7 @@ MergeStrategy
 source trace
 ```
 
-## Phase 4：Decode + Validate（解码与校验）
+## 阶段 4：解码与校验（Decode + Validate）
 
 实现：
 
@@ -1084,7 +1084,7 @@ required/default/secret tag
 Validator
 ```
 
-## Phase 5：Secret + Sanitize + Error（密钥、脱敏与错误）
+## 阶段 5：密钥、脱敏与错误（Secret + Sanitize + Error）
 
 实现：
 
@@ -1094,7 +1094,7 @@ SanitizedResult
 错误归一
 ```
 
-## Phase 6：Examples + TestKit（示例与 TestKit）
+## 阶段 6：示例与 TestKit（Examples + TestKit）
 
 实现：
 
@@ -1103,7 +1103,7 @@ examples
 testkit fixtures
 ```
 
-## Phase 7：Harness + CI
+## 阶段 7：Harness 与 CI
 
 实现：
 
@@ -1115,7 +1115,7 @@ examples
 evidence gates
 ```
 
-## Phase 8：Docs + ADR（文档与 ADR）
+## 阶段 8：文档与 ADR（Docs + ADR）
 
 补齐：
 
@@ -1126,24 +1126,24 @@ ADR
 contracts
 ```
 
-## Phase 9：Release
+## 阶段 9：发布（Release）
 
 生成：
 
 ```text
-v0.1.0 release evidence
+v0.1.0 发布证据（release evidence）
 ```
 
-## Phase 10：Retrospective
+## 阶段 10：复盘（Retrospective）
 
 输出：
 
 ```text
-self-improving patch
+自改进补丁（self-improving patch）
 ```
 
 
-# 12. Task Breakdown
+# 12. 任务拆解（Task Breakdown）
 
 ## TASK-CONFIGX-001：创建模块骨架
 
@@ -1193,7 +1193,7 @@ go get github.com/bytechainx/foundationx
 EVID-TASK-CONFIGX-002-20260601-001: go.mod diff
 ```
 
-## TASK-CONFIGX-003：实现 Source / LoadResult
+## TASK-CONFIGX-003：实现 Source 与 LoadResult
 
 文件：
 
@@ -1212,7 +1212,7 @@ TestLoadResultSanitizeMasksSecret
 TestSourceInterfaceCompile
 ```
 
-## TASK-CONFIGX-004：实现 Loader
+## TASK-CONFIGX-004：实现加载器（Loader）
 
 文件：
 
@@ -1231,7 +1231,7 @@ TestLoaderFailFast
 TestLoaderSourceReports
 ```
 
-## TASK-CONFIGX-005：实现 EnvSource
+## TASK-CONFIGX-005：实现环境变量 Source（EnvSource）
 
 文件：
 
@@ -1250,7 +1250,7 @@ TestEnvSourceDoesNotLoadAllByDefault
 TestEnvSourceAutoMarksSecretKeys
 ```
 
-## TASK-CONFIGX-006：实现 EnvFileSource
+## TASK-CONFIGX-006：实现 env 文件 Source（EnvFileSource）
 
 文件：
 
@@ -1274,7 +1274,7 @@ TestEnvFileDoesNotAutoSearchDotEnv
 TestEnvFileDoesNotLeakSecretOnError
 ```
 
-## TASK-CONFIGX-007：实现 JSONFileSource
+## TASK-CONFIGX-007：实现 JSON 文件 Source（JSONFileSource）
 
 文件：
 
@@ -1294,7 +1294,7 @@ TestJSONFileSourceNotFound
 TestJSONFileSourceArrayBehaviorDocumented
 ```
 
-## TASK-CONFIGX-008：实现 MapSource
+## TASK-CONFIGX-008：实现 Map Source（MapSource）
 
 文件：
 
@@ -1311,7 +1311,7 @@ TestSecretMapSourceMarksSecrets
 TestMapSourceTrace
 ```
 
-## TASK-CONFIGX-009：实现 Merge
+## TASK-CONFIGX-009：实现合并（Merge）
 
 文件：
 
@@ -1330,7 +1330,7 @@ TestMergePreservesSecretFlag
 TestMergeRecordsOverride
 ```
 
-## TASK-CONFIGX-010：实现 Decode
+## TASK-CONFIGX-010：实现解码（Decode）
 
 文件：
 
@@ -1357,7 +1357,7 @@ TestDecodeTypeError
 TestDecodeDoesNotLeakSecretValue
 ```
 
-## TASK-CONFIGX-011：实现 Validate
+## TASK-CONFIGX-011：实现校验（Validate）
 
 文件：
 
@@ -1374,7 +1374,7 @@ TestValidateNoopWhenNoValidator
 TestValidatePreservesError
 ```
 
-## TASK-CONFIGX-012：实现 Secret / Sanitize
+## TASK-CONFIGX-012：实现密钥与脱敏（Secret / Sanitize）
 
 文件：
 
@@ -1397,7 +1397,7 @@ TestSanitizeKeepsNonSecrets
 TestFmtSprintSecretDoesNotLeak
 ```
 
-## TASK-CONFIGX-013：实现 Error Mapping
+## TASK-CONFIGX-013：实现错误映射（Error Mapping）
 
 文件：
 
@@ -1416,7 +1416,7 @@ TestMapErrorPreservesCause
 TestErrorsDoNotLeakSecret
 ```
 
-## TASK-CONFIGX-014：实现 TestKit
+## TASK-CONFIGX-014：实现测试工具（TestKit）
 
 文件：
 
@@ -1436,7 +1436,7 @@ AssertValue
 AssertSecretMasked
 ```
 
-## TASK-CONFIGX-015：编写 Examples
+## TASK-CONFIGX-015：编写示例（Examples）
 
 目录：
 
@@ -1456,7 +1456,7 @@ examples/xgo_secrets_path
 3. examples 可以 go run
 ```
 
-## TASK-CONFIGX-016：编写 Harness Scripts
+## TASK-CONFIGX-016：编写 Harness 脚本（Harness Scripts）
 
 文件：
 
@@ -1521,7 +1521,7 @@ docs/adr/ADR-20260601-003-secret-handling.md
 docs/adr/ADR-20260601-004-yaml-toml-scope.md
 ```
 
-## TASK-CONFIGX-020：生成 Release Manifest
+## TASK-CONFIGX-020：生成发布清单（Release Manifest）
 
 命令：
 
@@ -1553,7 +1553,7 @@ docs/xgo-integration.md
 5. 业务配置结构保留在 x.go
 ```
 
-## TASK-CONFIGX-022：Retrospective
+## TASK-CONFIGX-022：复盘（Retrospective）
 
 输出：
 
@@ -1565,33 +1565,33 @@ docs/xgo-integration.md
 ```
 
 
-# 13. Harness Gates
+# 13. 验证 Gate（Harness Gate）
 
-## Gate 1：Format
+## Gate 1：格式化（Format）
 
 ```bash
 go fmt ./...
 ```
 
-## Gate 2：Vet
+## Gate 2：静态检查（Vet）
 
 ```bash
 go vet ./...
 ```
 
-## Gate 3：Unit Test（单元测试）
+## Gate 3：单元测试（Unit Test）
 
 ```bash
 go test ./...
 ```
 
-## Gate 4：Race Test（竞态测试）
+## Gate 4：竞态测试（Race Test）
 
 ```bash
 go test -race ./...
 ```
 
-## Gate 5：Boundary
+## Gate 5：边界（Boundary）
 
 ```bash
 ./scripts/check_boundary.sh
@@ -1606,7 +1606,7 @@ go test -race ./...
 不出现全局配置单例模式
 ```
 
-## Gate 6：Secret
+## Gate 6：密钥（Secret）
 
 ```bash
 ./scripts/check_secrets.sh
@@ -1619,7 +1619,7 @@ go test -race ./...
 允许出现示例变量名，但不允许真实值
 ```
 
-## Gate 7：Contract
+## Gate 7：契约（Contract）
 
 ```bash
 ./scripts/check_contracts.sh
@@ -1636,7 +1636,7 @@ contracts/tags.md
 docs/api.md
 ```
 
-## Gate 8：Examples
+## Gate 8：示例（Examples）
 
 ```bash
 go run ./examples/envfile
@@ -1646,7 +1646,7 @@ go run ./examples/secret
 go run ./examples/xgo_secrets_path
 ```
 
-## Gate 9：Evidence
+## Gate 9：证据（Evidence）
 
 ```bash
 ./scripts/generate_manifest.sh
@@ -1660,7 +1660,7 @@ release/manifest/v0.1.0.json
 
 ---
 
-# 14. Boundary Gate 脚本模板
+# 14. 边界 Gate 脚本模板（Boundary Gate）
 
 ```bash
 #!/usr/bin/env bash
@@ -1729,7 +1729,7 @@ echo "configx boundary check passed"
 
 ---
 
-# 15. Secret Gate 脚本模板
+# 15. 密钥 Gate 脚本模板（Secret Gate）
 
 ```bash
 #!/usr/bin/env bash
@@ -1882,7 +1882,7 @@ jobs:
 
 ---
 
-# 18. Release Manifest 模板
+# 18. 发布清单模板（Release Manifest）
 
 ```json
 {
@@ -1934,7 +1934,7 @@ jobs:
 
 ---
 
-# 19. Traceability Matrix
+# 19. 可追踪矩阵（Traceability Matrix）
 
 | Requirement | Acceptance Criteria | Design | Task | Test | Evidence | Status |
 |---|---|---|---|---|---|---|
@@ -1952,7 +1952,7 @@ jobs:
 | REQ-CONFIGX-012 | AC-012-* | Harness | TASK-016/017/020 | make release-check | EVID-020 | TODO |
 
 
-# 20. Risk Register
+# 20. 风险登记（Risk Register）
 
 ## RISK-CONFIGX-001：隐式读取生产密钥
 
@@ -1970,7 +1970,7 @@ Boundary Gate 检查自动默认路径。
 Examples 只演示显式传 path。
 ```
 
-## RISK-CONFIGX-002：Secret 泄露
+## RISK-CONFIGX-002：密钥（Secret）泄露
 
 风险：
 
@@ -2017,7 +2017,7 @@ x.go 定义业务 Config。
 configx 只 decode 到调用方结构体。
 ```
 
-## RISK-CONFIGX-005：Decode 过度复杂
+## RISK-CONFIGX-005：解码（Decode）过度复杂
 
 风险：
 
@@ -2032,7 +2032,7 @@ v0.1 只支持基础类型。
 复杂嵌套 v0.2 决策。
 ```
 
-## RISK-CONFIGX-006：Secret key 自动识别误伤
+## RISK-CONFIGX-006：密钥 key（Secret key）自动识别误伤
 
 风险：
 
@@ -2049,9 +2049,9 @@ v0.1 只支持基础类型。
 
 ---
 
-# 21. Decision Log
+# 21. 决策日志（Decision Log）
 
-## DEC-20260601-001：显式 Source Loading
+## DEC-20260601-001：显式 Source 加载（Source Loading）
 
 决策：
 
@@ -2065,7 +2065,7 @@ configx 不自动搜索 .env，不自动读取 /home/k8s/secrets/env/*。
 避免隐式副作用，保证部署环境可审计。
 ```
 
-## DEC-20260601-002：不提供全局 Config
+## DEC-20260601-002：不提供全局配置（Config）
 
 决策：
 
@@ -2079,7 +2079,7 @@ configx 使用 Loader 实例和 LoadResult，不提供 GlobalConfig。
 提升测试隔离和并发安全。
 ```
 
-## DEC-20260601-003：Secret 默认脱敏
+## DEC-20260601-003：密钥（Secret）默认脱敏
 
 决策：
 
@@ -2102,7 +2102,7 @@ v0.1 默认必做 env/envfile/json/map。
 YAML/TOML 需要 AutoResearch + ADR 决定是否进入 v0.1。
 ```
 
-## DEC-20260601-005：watch reload 不进入 v0.1
+## DEC-20260601-005：监听重载（watch reload）不进入 v0.1
 
 决策：
 
@@ -2118,7 +2118,7 @@ watch/hot reload 不纳入 configx v0.1。
 
 ---
 
-# 22. AutoResearch Protocol
+# 22. 自动研究协议（AutoResearch Protocol）
 
 触发条件：
 
@@ -2206,7 +2206,7 @@ postgresx 负责 PostgreSQL 连接
 
 ---
 
-# 24. Release Protocol
+# 24. 发布协议（Release Protocol）
 
 ## 24.1 v0.1.0 发布前
 
@@ -2230,56 +2230,56 @@ examples
 evidence
 ```
 
-## 24.2 CHANGELOG
+## 24.2 变更日志（CHANGELOG）
 
 ```markdown
 ## v0.1.0 - 2026-06-01
 
-### Added
-- Added Source abstraction.
-- Added EnvSource.
-- Added EnvFileSource.
-- Added JSONFileSource.
-- Added MapSource.
-- Added Loader and LoadResult.
-- Added MergeStrategy.
-- Added struct Decode with required/default/secret tags.
-- Added Validator interface.
-- Added Secret detection and SanitizedResult.
-- Added error mapping to foundationx.Error.
-- Added TestKit and examples.
-- Added boundary, secret, contract, example, and evidence gates.
+### 新增（Added）
+- 新增 Source abstraction。
+- 新增 EnvSource。
+- 新增 EnvFileSource。
+- 新增 JSONFileSource。
+- 新增 MapSource。
+- 新增 Loader 和 LoadResult。
+- 新增 MergeStrategy。
+- 新增带 required/default/secret tags 的 struct Decode。
+- 新增 Validator interface。
+- 新增 Secret detection 和 SanitizedResult。
+- 新增到 foundationx.Error 的 error mapping。
+- 新增 TestKit 和 examples。
+- 新增 boundary、secret、contract、example 和 evidence gates。
 
-### Security
-- Secret values are masked in SanitizedResult.
-- Secret Gate added.
-- Explicit source loading prevents accidental production secret reads.
+### 安全（Security）
+- 密钥值（Secret values）在 SanitizedResult 中被 mask。
+- 已新增 Secret Gate。
+- 显式 source loading（Explicit source loading）防止意外读取 production secrets。
 
-### Deferred
-- YAML source requires ADR.
-- TOML source requires ADR.
-- Watch reload deferred.
+### 延后（Deferred）
+- YAML 来源（YAML source）支持需要 ADR。
+- TOML 来源（TOML source）支持需要 ADR。
+- 监听重载（watch reload）已延后。
 
-### Breaking Changes
-- None.
+### 破坏性变更（Breaking Changes）
+- 无。
 ```
 
-## 24.3 Release 声明
+## 24.3 发布声明（Release）
 
 ```text
 DONE with evidence:
-- make release-check passed
-- go test ./... passed
-- go test -race ./... passed
-- boundary gate passed
-- secret gate passed
-- examples passed
-- release/manifest/v0.1.0.json generated
+- make release-check 通过
+- go test ./... 通过
+- go test -race ./... 通过
+- boundary gate 通过
+- secret gate 通过
+- examples 通过
+- release/manifest/v0.1.0.json 已生成
 ```
 
 ---
 
-# 25. Retrospective Protocol
+# 25. 复盘协议（Retrospective Protocol）
 
 输出：
 
@@ -2290,38 +2290,38 @@ DONE with evidence:
 模板：
 
 ```markdown
-# configx Retrospective
+# configx 复盘（Retrospective）
 
-## Release
-- Version:
-- Commit:
-- Date:
+## 发布信息（Release）
+- 版本（Version）：
+- 提交（Commit）：
+- 日期（Date）：
 
-## What worked
+## 有效做法
 -
 
-## What failed
+## 失败项
 -
 
-## API stability concerns
+## API 稳定性关注点
 -
 
-## Boundary risks
+## 边界风险
 -
 
-## Security findings
+## 安全发现
 -
 
-## Secret handling findings
+## 密钥（Secret）处理发现
 -
 
-## Decode limitations
+## 解码（Decode）限制
 -
 
-## Harness improvements
+## 验证工具（Harness）改进
 -
 
-## Reusable patterns for other base libs
+## 可复用到其他 base libs 的模式
 - foundationx:
 - postgresx:
 - redisx:
@@ -2329,20 +2329,20 @@ DONE with evidence:
 - taosx:
 - ossx:
 
-## Next issue candidates
+## 下一批 issue 候选
 -
 
-## Patch outputs
-- PATCH-PROMPT:
-- PATCH-HARNESS:
-- PATCH-RULE:
+## 补丁输出（Patch）
+- PATCH-PROMPT：
+- PATCH-HARNESS：
+- PATCH-RULE：
 ```
 
 ---
 
-# 26. Final DoD
+# 26. 最终完成定义（DoD）
 
-## Task DoD
+## 任务完成定义（DoD）
 
 ```text
 代码实现完成
@@ -2354,7 +2354,7 @@ DONE with evidence:
 go fmt / go vet / go test / go test -race 通过
 ```
 
-## Module DoD
+## 模块完成定义（Module DoD）
 
 ```text
 Source 完整
@@ -2376,7 +2376,7 @@ Harness 完整
 Release Manifest 完整
 ```
 
-## Goal DoD
+## 目标完成定义（Goal DoD）
 
 ```text
 configx 可作为 x.go 和基础库体系的配置加载基础库使用
@@ -2393,14 +2393,14 @@ retrospective patch 生成
 
 ```text
 DONE with evidence:
-- go test ./... passed
-- go test -race ./... passed
-- make ci passed
-- make release-check passed
-- boundary gate passed
-- secret gate passed
-- examples passed
-- release/manifest/v0.1.0.json generated
+- go test ./... 通过
+- go test -race ./... 通过
+- make ci 通过
+- make release-check 通过
+- boundary gate 通过
+- secret gate 通过
+- examples 通过
+- release/manifest/v0.1.0.json 已生成
 ```
 
 ---
@@ -2489,9 +2489,9 @@ DONE with evidence:
 - 具体命令
 - 具体测试结果
 - 具体文件路径
-- release manifest 路径
-- known risks
-- next recommended issue
+- 发布清单（release manifest）路径
+- 已知风险（risks）
+- 下一条推荐 issue（recommended issue）
 ```
 
 ---

@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -33,17 +34,13 @@ func (s SecretString) String() string {
 	}
 	return redacted
 }
+
+func (s SecretString) Reveal() string                { return string(s) }
 func (s SecretString) Sanitize() any                { return s.String() }
 func (s SecretString) IsZero() bool                 { return s == "" }
 func (s SecretString) GoString() string             { return s.String() }
 func (s SecretString) MarshalText() ([]byte, error) { return []byte(s.String()), nil }
 func (s SecretString) MarshalJSON() ([]byte, error) { return json.Marshal(s.String()) }
-func (s SecretString) Sanitize() any                { return s.String() }
-func (s SecretString) IsZero() bool                 { return s == "" }
-
-type Sanitizer interface {
-	Sanitize() any
-}
 
 type ErrorKind string
 
@@ -264,4 +261,21 @@ func NewVersionInfo(module, version, commit, buildTime, goVersion string) Versio
 		BuildTime: buildTime,
 		GoVersion: goVersion,
 	}
+}
+
+func (v VersionInfo) String() string {
+	module := v.Module
+	if slash := strings.LastIndex(module, "/"); slash >= 0 {
+		module = module[slash+1:]
+	}
+	if module == "" {
+		module = "unknown"
+	}
+	if v.Version == "" {
+		return module
+	}
+	if v.Commit == "" {
+		return fmt.Sprintf("%s %s", module, v.Version)
+	}
+	return fmt.Sprintf("%s %s (%s)", module, v.Version, v.Commit)
 }

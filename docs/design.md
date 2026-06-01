@@ -1,4 +1,4 @@
-# DESIGN-configx-v1.0
+# configx 设计（DESIGN v1.0）
 
 ## 架构
 

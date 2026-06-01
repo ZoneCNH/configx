@@ -1,4 +1,4 @@
-# Metrics Contract
+# 指标契约（Metrics Contract）
 
 标准指标用于描述 `pkg/configx` 暴露给调用方的最小可观测面。实现可以接入任意 metrics 后端，但指标名、类型和标签语义必须保持兼容。
 

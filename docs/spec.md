@@ -1,4 +1,4 @@
-# SPEC-configx-v1.0
+# configx 规格（SPEC v1.0）
 
 ## 需求
 

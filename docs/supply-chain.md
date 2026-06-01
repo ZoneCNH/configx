@@ -1,4 +1,4 @@
-# 供应链与 Evidence
+# 供应链与证据（Evidence）
 
 ## 目标
 
@@ -8,7 +8,7 @@
 - 当前源码、contract 文件和依赖清单是否与 manifest 一致。
 - 必需 gate 是否全部以 `passed` 状态完成。
 
-## Manifest 生成
+## 清单生成（Manifest）
 
 `make evidence` 调用 `scripts/generate_manifest.sh`，最终由 `internal/tools/releasemanifest` 生成 `release/manifest/latest.json`。生成内容包括：
 
@@ -21,18 +21,18 @@
 
 `release/manifest/latest.json` 是生成产物，不提交源码历史；`release/manifest/template.json` 只保留字段模板。
 
-## Manifest 校验
+## 清单校验（Manifest）
 
 `make release-evidence-check` 会重新读取当前仓库事实，并校验：
 
-- manifest 的 module、commit、tree SHA、源码摘要和受跟踪文件数量与当前仓库一致。
-- contract 指纹和依赖清单与当前文件、当前 Go module 解析结果一致。
+- 清单（manifest）的 module、commit、tree SHA、源码摘要和受跟踪文件数量与当前仓库一致。
+- 契约（contract）指纹和依赖清单与当前 Go module 解析结果一致。
 - 必需 check 均存在，且在 release gate 中必须为 `passed`。
-- artifact 列表包含 `release/manifest/latest.json`。
+- 产物（artifact）列表包含 `release/manifest/latest.json`。
 
 `make release-final-check` 在上述校验之外要求 `tree_state=clean`。正式发布、打 tag 或交付给下游基础库前必须使用该入口。
 
-## CI Artifact
+## 持续集成产物（CI Artifact）
 
 GitHub Actions 运行 `GOWORK=off make release-check`，并上传 `release/manifest/latest.json` 作为 `release-manifest` artifact。CI 中上传的 artifact 是发布 Evidence 的外部留痕；本地生成的 `latest.json` 只用于验证和排障。
 

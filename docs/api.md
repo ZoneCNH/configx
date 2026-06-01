@@ -1,4 +1,4 @@
-# configx API
+# configx 接口（API）
 
 `configx` 暴露显式配置加载原语，并保留已应用模板继承的标准基础库 contract。
 
@@ -9,7 +9,7 @@
 - `(*Loader).Load(context.Context) (LoadResult, error)` 按顺序加载每个 source。后面的值覆盖前面的值；先前的 `Value` 会标记为 `Overridden`。
 - `WithFailFast(bool)` 控制 source error 是否立即停止加载。
 
-## Sources
+## 来源类型（Source）
 
 - `NewEnvSource(prefix string, keys []string, opts ...SourceOption)` 在应用 prefix 后只读取指定 key。这是 environment 使用场景的安全默认方式。
 - `NewAllEnvSource(prefix string, opts ...SourceOption)` 读取所有匹配的 environment variables，并且必须显式 opt-in。
@@ -19,7 +19,7 @@
 
 每个 source 都通过 `SourceReport` 报告 `Name`、`Kind`、可选 `Path`、已加载 key 和 sanitized errors。
 
-## Decode 与 validation
+## 解码与校验（Decode 与 validation）
 
 `Decode(result, &target)` 根据 `config` tags 填充导出的 struct fields。支持的 tags：
 
@@ -30,11 +30,11 @@
 
 支持的 field types 包括 strings、booleans、有符号和无符号 integers、floats、`time.Duration`、`SecretString`，以及实现 `encoding.TextUnmarshaler` 的类型。如果 target 实现 `Validate() error`，`Decode` 会在字段赋值后运行它。
 
-## Sanitization
+## 脱敏（Sanitization）
 
 `LoadResult.Sanitize()` 返回 `SanitizedResult`，其中 secret values 会脱敏为 `***`。包含 secret、password、passwd、token、access_key 或 secret_key 的 keys 会被视为 secrets；`NewSecretMapSource` 可以显式标记额外 key。`SecretString.String()` 与 text marshaling 均返回脱敏输出。
 
-## Baseline contracts
+## 基础契约（Baseline contracts）
 
 仓库也保留模板中的 baseline contracts：
 

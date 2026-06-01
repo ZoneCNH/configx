@@ -16,6 +16,6 @@
 
 记录权衡、迁移影响和后续工作。
 
-## Evidence
+## 证据（Evidence）
 
 链接到测试、Harness、manifest 和评审记录。

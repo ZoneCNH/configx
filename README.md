@@ -1,18 +1,18 @@
 # configx
 
-`configx` is an explicit, dependency-light Go configuration base library for ByteChainX services and libraries. It provides typed loaders for environment variables, env files, JSON files, and in-memory maps; deterministic source merging; struct decoding; validation hooks; and safe sanitization for logs, health output, and release evidence.
+`configx` 是面向 ByteChainX services 和 libraries 的显式、dependency-light Go configuration base library。它提供 environment variables、env files、JSON files 和 in-memory maps 的 typed loaders，支持确定性的 source merging、struct decoding、validation hooks，以及面向 logs、health output 和 release evidence 的安全 sanitization。
 
-The library is intentionally explicit: callers choose every source and path. It does not discover config files automatically, create global configuration state, register singletons, import driver packages, or depend on any `x.go` module.
+该 library 有意保持显式：每个 source 和 path 都由调用方选择。它不会自动发现 config files，不会创建 global configuration state，不会注册 singletons，不会 import driver packages，也不会依赖任何 `x.go` module。
 
-## Goals
+## 目标
 
-- Load configuration only from caller-provided sources.
-- Merge sources predictably with last-wins semantics.
-- Decode into caller-owned structs using `config`, `default`, and `required` tags.
-- Mark and redact secret-like keys before values are logged or serialized.
-- Preserve stable base-library contracts for errors, health, metrics, tests, CI, and release evidence.
+- 只从调用方提供的 sources 加载 configuration。
+- 使用 last-wins 语义以可预测方式 merge sources。
+- 使用 `config`、`default` 和 `required` tags decode 到调用方拥有的 structs。
+- 在 values 被记录到 log 或 serialized 之前标记并 redact 类似 secret 的 keys。
+- 保留 errors、health、metrics、tests、CI 和 release evidence 的稳定 base-library contracts。
 
-## Quick start
+## 快速开始
 
 ```go
 loader := configx.NewLoader().
@@ -39,26 +39,26 @@ if err := configx.Decode(result, &cfg); err != nil {
 safe := result.Sanitize() // secret values are redacted
 ```
 
-## Public API areas
+## 公共 API 范围
 
-- `NewLoader`, `Loader.AddSource`, `Loader.Load`: build and run explicit source pipelines.
-- `NewEnvSource`, `NewAllEnvSource`, `NewEnvFileSource`, `NewJSONFileSource`, `NewMapSource`: concrete source adapters.
-- `LoadResult`, `Value`, `SourceReport`, `SanitizedResult`: inspect loaded values and source evidence.
-- `Decode`: populate caller structs from a `LoadResult`.
-- `SecretString`, `NewSecretString`, `IsSecretKey`: secret handling helpers backed by `foundationx` compatibility.
-- `Config`, `New`, `Close`, `HealthCheck`, `Error`, `Metrics`: baseline library contracts retained from the baselib template.
+- `NewLoader`、`Loader.AddSource`、`Loader.Load`：构建并运行显式 source pipelines。
+- `NewEnvSource`、`NewAllEnvSource`、`NewEnvFileSource`、`NewJSONFileSource`、`NewMapSource`：具体 source adapters。
+- `LoadResult`、`Value`、`SourceReport`、`SanitizedResult`：检查已加载 values 与 source evidence。
+- `Decode`：从 `LoadResult` 填充调用方 structs。
+- `SecretString`、`NewSecretString`、`IsSecretKey`：由 `foundationx` compatibility 支持的 secret handling helpers。
+- `Config`、`New`、`Close`、`HealthCheck`、`Error`、`Metrics`：从 baselib template 保留的 baseline library contracts。
 
-## Non-goals
+## 非目标
 
-- No implicit config discovery.
-- No process-wide mutable configuration singleton.
-- No hidden driver dependencies.
-- No secret values in sanitized output.
-- No dependency on `github.com/bytechainx/x.go`, `github.com/ZoneCNH/x.go`, or internal `x.go` packages.
+- 不做 implicit config discovery。
+- 不提供 process-wide mutable configuration singleton。
+- 不引入 hidden driver dependencies。
+- 不在 sanitized output 中出现 secret values。
+- 不依赖 `github.com/bytechainx/x.go`、`github.com/ZoneCNH/x.go` 或 internal `x.go` packages。
 
-## Commands
+## 命令
 
-If this checkout is under a parent `go.work`, run validation with `GOWORK=off` to prove module independence.
+如果当前 checkout 位于上层 `go.work` 之下，使用 `GOWORK=off` 运行 validation，以证明 module independence。
 
 ```bash
 GOWORK=off go test ./...
@@ -68,13 +68,13 @@ GOWORK=off make contracts
 GOWORK=off ./scripts/check_secrets.sh
 ```
 
-`make lint` requires `golangci-lint`; `make security` requires `govulncheck` plus the local secret scanner. CI is expected to install those tools explicitly.
+`make lint` 需要 `golangci-lint`；`make security` 需要 `govulncheck` 和本地 secret scanner。CI 应显式安装这些 tools。
 
-## Documentation
+## 文档
 
-- [Goal](docs/goal.md): authoritative product and acceptance criteria.
-- [API](docs/api.md): public configuration API and contracts.
-- [Config](docs/config.md): source, merge, decode, validation, and sanitization rules.
-- [foundationx compatibility](docs/foundationx-compatibility.md): local compatibility boundary and upgrade rule.
-- [Testing](docs/testing.md): unit, contract, race, boundary, security, and release evidence gates.
-- [Release](docs/release.md): release manifest and evidence requirements.
+- [Goal](docs/goal.md)：权威 product 目标和 acceptance criteria。
+- [API](docs/api.md)：公共 configuration API 与 contracts。
+- [Config](docs/config.md)：source、merge、decode、validation 和 sanitization 规则。
+- [foundationx compatibility](docs/foundationx-compatibility.md)：local compatibility boundary 与 upgrade rule。
+- [Testing](docs/testing.md)：unit、contract、race、boundary、security 和 release evidence gates。
+- [Release](docs/release.md)：release manifest 与 evidence 要求。

@@ -49,7 +49,7 @@ GOWORK=off make release-check
 
 这组验证用于防止生成脚本、包路径、imports、contract gate、boundary gate 和生成后 Evidence 回归。
 
-## 生成后 Release Evidence
+## 生成后发布证据（Release Evidence）
 
 生成后的库会继承 `internal/tools/releasemanifest`。该工具会生成并校验 `release/manifest/latest.json`，其中包括当前 HEAD、tree SHA、源码摘要、contract SHA256、依赖清单和工具版本。发布前应使用：
 

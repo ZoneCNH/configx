@@ -7,7 +7,7 @@
 
 ## 错误类型
 
-| `ErrorKind` | 字符串 | 典型场景 | Retryable |
+| `ErrorKind` | 字符串 | 典型场景 | 可重试（Retryable） |
 | --- | --- | --- | --- |
 | `ErrorKindConfig` | `config` | 配置来源或配置装载失败。 | 否 |
 | `ErrorKindValidation` | `validation` | 配置字段缺失、格式非法、调用参数非法。 | 否 |

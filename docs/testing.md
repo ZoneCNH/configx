@@ -69,7 +69,7 @@
 - `go test ./...` 必须覆盖公共包、`internal/`、`contracts/`、`testkit/` 和 `examples/`。
 - 配置校验。
 - 配置脱敏。
-- typed error kind 和 wrapped cause。
+- 类型化 error kind 和 wrapped cause。
 - 客户端创建、取消 context、过期 context。
 - 幂等关闭、zero-value client、取消 context。
 - 健康与非健康状态检查。

@@ -29,9 +29,9 @@
 | L6 | Release Evidence | Manifest、Evidence、Review、Retrospective |
 | L7 | Profile-Specific Heavy | Chaos、Mutation、Long Soak、Full E2E |
 
-## 4. Required Gates
+## 4. 必需 Gate（Required Gates）
 
-Required Gates 必须由所有生成库继承：
+必需 Gate（Required Gates）必须由所有生成库继承：
 
 ```text
 make fmt
@@ -49,9 +49,9 @@ make release-check
 
 `make ci` 保持快、稳、轻，负责默认开发与 PR 基线。
 
-## 5. Extended Gates
+## 5. 扩展 Gate（Extended Gates）
 
-Extended Gates 推荐默认实现，但不进入轻量 `make ci`：
+扩展 Gate（Extended Gates）推荐默认实现，但不进入轻量 `make ci`：
 
 ```text
 make property
@@ -63,11 +63,11 @@ make release-check-extended
 
 `make ci-extended` 用于发布前强验证、公共 API 变更、contract 变更、schema 变更、metrics 变更和安全敏感变更。
 
-## 6. Profile Gates
+## 6. 按类型 Gate（Profile Gate）
 
 不同派生库按类型启用 profile。
 
-### Pure Library
+### 纯库（Pure Library）
 
 适用于：
 
@@ -86,7 +86,7 @@ contract
 security
 ```
 
-### Config Library
+### 配置库（Config Library）
 
 适用于：
 
@@ -114,7 +114,7 @@ sanitize 输出稳定
 schema 与 Config 字段同步
 ```
 
-### Observability Library
+### 可观测库（Observability Library）
 
 适用于：
 
@@ -141,7 +141,7 @@ trace context 不丢失
 health JSON 稳定
 ```
 
-### Storage Library
+### 存储库（Storage Library）
 
 适用于：
 
@@ -172,7 +172,7 @@ soak-lite
 compatibility
 ```
 
-### Messaging Library
+### 消息库（Messaging Library）
 
 适用于：
 
@@ -202,7 +202,7 @@ retry
 idempotency
 ```
 
-## 7. Evidence Policy
+## 7. 证据策略（Evidence）
 
 没有 Evidence 不允许声明完成。
 
@@ -212,29 +212,29 @@ idempotency
 DONE with evidence:
 ```
 
-Evidence 至少包含：
+证据（Evidence）至少包含：
 
 ```text
 commit
 Go version
 tree state
-make ci result
-make release-check result
-manifest path
-artifact path
+make ci 结果
+make release-check 结果
+manifest 路径
+artifact 路径
 ```
 
-Extended Evidence 推荐包含：
+扩展证据（Evidence）推荐包含：
 
 ```text
-make ci-extended result
-property result
-fuzz-smoke result
-golden result
-compatibility result
+make ci-extended 结果
+property 结果
+fuzz-smoke 结果
+golden 结果
+compatibility 结果
 ```
 
-## 8. Breaking Change Policy（破坏性变更策略）
+## 8. 破坏性变更策略（Breaking Change Policy）
 
 以下变更必须标记 breaking change：
 
@@ -247,7 +247,7 @@ compatibility result
 修改 release manifest 字段
 ```
 
-## 9. Retrospective Policy
+## 9. 复盘策略（Retrospective Policy）
 
 每次 release 后必须记录：
 

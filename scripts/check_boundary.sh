@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+cd "$(dirname "$0")/.."
+
 echo "checking forbidden generated files..."
 
 if found="$(find . \
@@ -34,6 +36,23 @@ FORBIDDEN_DEPS=(
 for dep in "${FORBIDDEN_DEPS[@]}"; do
   if grep -Fq "$dep" <<<"$DEPS"; then
     echo "ERROR: base library template must not depend on forbidden infrastructure dependency: $dep"
+    exit 1
+  fi
+done
+
+SEARCH_DIRS=(pkg internal contracts examples)
+
+echo "checking forbidden implicit config discovery..."
+
+FORBIDDEN_DISCOVERY_PATTERNS=(
+  '(^|[^[:alnum:]_./-])\.env([^[:alnum:]_./-]|$)'
+  '(^|[^[:alnum:]_./-])production\.yaml([^[:alnum:]_./-]|$)'
+  '/home/k8s/secrets/env'
+)
+
+for pattern in "${FORBIDDEN_DISCOVERY_PATTERNS[@]}"; do
+  if grep -R --line-number --extended-regexp "$pattern" "${SEARCH_DIRS[@]}" --exclude-dir=.git; then
+    echo "ERROR: forbidden implicit config discovery pattern found: $pattern"
     exit 1
   fi
 done

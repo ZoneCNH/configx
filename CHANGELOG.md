@@ -8,7 +8,7 @@
 
 ### 修复
 
-- Release Check workflow 在运行 `make release-check` 前安装 `golangci-lint` 和 `govulncheck`，并使用 `GOWORK=off`，与 CI 的强制 gate 环境保持一致。
+- 发布检查 workflow（Release Check workflow）在运行 `make release-check` 前安装 `golangci-lint` 和 `govulncheck`，并使用 `GOWORK=off`，与 CI 的强制 gate 环境保持一致。
 
 ## v0.1.0 - 2026-06-01
 
@@ -36,12 +36,12 @@
 - 添加 Secret Gate。
 - `make security` 强制运行 `govulncheck ./...` 和密钥扫描；缺少 `govulncheck` 时必须失败。
 - 配置脱敏规则覆盖 release Evidence 和日志可见内容。
-- Boundary Gate 同时拦截 `github.com/bytechainx/x.go` 和 `github.com/ZoneCNH/x.go`。
+- 边界 Gate（Boundary Gate）同时拦截 `github.com/bytechainx/x.go` 和 `github.com/ZoneCNH/x.go`。
 
 ### 治理
 
 - 添加 Evidence 和复盘模板。
-- CI 在 `make ci` 前安装 `golangci-lint` 和 `govulncheck`，与 Makefile 强制 gate 对齐。
+- 持续集成（CI）流程在 `make ci` 前安装 `golangci-lint` 和 `govulncheck`，与 Makefile 强制 gate 对齐。
 - `make release-check` 统一执行 CI、integration 和 manifest 生成。
 - `make release-final-check` 在发布前串联 `release-check`、release Evidence 校验和工作区洁净校验。
 - `make integration` 通过临时 `foundationx` 和 `corekit` 渲染、测试、contracts、boundary 与 Evidence 生成验证模板链路。

@@ -101,6 +101,8 @@ func TestFoundationxErrorKindContract(t *testing.T) {
 
 type mockHealthChecker struct{}
 
-func (*mockHealthChecker) HealthCheck(context.Context) foundationx.HealthStatus {
+func (*mockHealthChecker) Name() string { return "mock" }
+
+func (*mockHealthChecker) Check(context.Context) foundationx.HealthStatus {
 	return foundationx.NewHealthStatus("mock", foundationx.HealthHealthy, "ok", time.Now(), 0)
 }

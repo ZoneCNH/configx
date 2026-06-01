@@ -1,4 +1,4 @@
-# configx examples
+# configx 示例（examples）
 
 这些 examples 描述预期的 caller-owned 用法。它们避免 package globals 与 implicit discovery。
 
@@ -21,7 +21,7 @@ if err := configx.Decode(result, &cfg); err != nil {
 
 path 由 application 提供。`configx` 不得自行搜索该 directory。
 
-## Map override precedence（覆盖优先级）
+## 覆盖优先级（Map override precedence）
 
 ```go
 loader := configx.NewLoader()
@@ -33,7 +33,7 @@ result, err := loader.
 
 当实现选择这种 ordering convention 时，后面的 sources 具有更高 precedence；merge trace 必须让被选中的 value 与 source 可见。
 
-## Sanitized diagnostics
+## 脱敏诊断（Sanitized diagnostics）
 
 ```go
 safe := configx.Sanitize(result)
