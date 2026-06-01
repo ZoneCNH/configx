@@ -15,9 +15,13 @@
 - `NewAllEnvSource(prefix string, opts ...SourceOption)` 读取所有匹配的环境变量，并且必须显式 opt in。
 - `NewEnvFileSource(path string, opts ...SourceOption)` 读取调用方提供的 dotenv-style 文件路径。
 - `NewJSONFileSource(path string, opts ...SourceOption)` 读取调用方提供的 JSON 文件路径，并用点号展开嵌套 key。
+- `NewTOMLFileSource(path string, opts ...SourceOption)` 读取调用方提供的 TOML 文件路径，并用点号展开嵌套 key。
+- `NewYAMLFileSource(path string, opts ...SourceOption)` 读取调用方提供的 YAML 或 YML 文件路径，并用点号展开嵌套 key。
 - `NewMapSource` 和 `NewSecretMapSource` 支持测试与 embedded defaults。
 
 每个 source 都通过 `SourceReport` 报告 `Name`、`Kind`、可选 `Path`、已加载 key 和脱敏后的 errors。
+
+`LoadEnvFile`、`LoadJSONFile`、`LoadTOMLFile`、`LoadYAMLFile` 和 `LoadMap` 是单 source convenience loaders；它们仍要求调用方显式传入路径或 values，不做任何默认文件名发现。
 
 ## 解码与校验
 

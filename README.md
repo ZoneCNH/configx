@@ -1,6 +1,6 @@
 # configx
 
-`configx` 是面向 ZoneCNH 服务与库的显式、轻依赖 Go 配置基础库。它提供环境变量、env 文件、JSON 文件与内存映射的类型化加载器，支持可预测的 source 合并、结构体解码、校验 hooks，以及面向日志、health 输出和发布证据的安全脱敏。
+`configx` 是面向 ZoneCNH 服务与库的显式、轻依赖 Go 配置基础库。它提供环境变量、env 文件、JSON、TOML、YAML 文件与内存映射的类型化加载器，支持可预测的 source 合并、结构体解码、校验 hooks，以及面向日志、health 输出和发布证据的安全脱敏。
 
 该库有意保持显式：每个 source 和路径都由调用方选择。它不会自动发现配置文件，不会创建全局配置状态，不会注册单例，不会导入 driver packages，也不会依赖任何 `x.go` module。
 
@@ -42,7 +42,8 @@ safe := result.Sanitize() // secret 值已脱敏
 ## 公共 API 范围
 
 - `NewLoader`、`Loader.AddSource`、`Loader.Load`：构建并运行显式 source 管线。
-- `NewEnvSource`、`NewAllEnvSource`、`NewEnvFileSource`、`NewJSONFileSource`、`NewMapSource`：具体 source 适配器。
+- `NewEnvSource`、`NewAllEnvSource`、`NewEnvFileSource`、`NewJSONFileSource`、`NewTOMLFileSource`、`NewYAMLFileSource`、`NewMapSource`：具体 source 适配器。
+- `LoadEnvFile`、`LoadJSONFile`、`LoadTOMLFile`、`LoadYAMLFile`、`LoadMap`：单 source convenience loaders。
 - `LoadResult`、`Value`、`SourceReport`、`SanitizedResult`：检查已加载 values 与 source 证据。
 - `Decode`：从 `LoadResult` 填充调用方 structs。
 - `SecretString`、`NewSecretString`、`IsSecretKey`：由 `foundationx` compatibility 支持的 secret 处理 helpers。

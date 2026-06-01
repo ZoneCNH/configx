@@ -408,6 +408,14 @@ func flattenMap(raw map[string]any, source string) Map {
 				}
 				walk(key, vv)
 			}
+		case map[any]any:
+			for k, vv := range x {
+				key := fmt.Sprint(k)
+				if prefix != "" {
+					key = prefix + "." + key
+				}
+				walk(key, vv)
+			}
 		default:
 			out[prefix] = Value{Key: prefix, Value: fmt.Sprint(x), Secret: IsSecretKey(prefix), Source: source, LoadedAt: now}
 		}

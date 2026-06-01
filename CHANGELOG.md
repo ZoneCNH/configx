@@ -2,6 +2,14 @@
 
 ## 未发布
 
+### 新增
+
+- 新增显式 TOML 与 YAML/YML 文件 source，并提供 `LoadTOMLFile`、`LoadYAMLFile` convenience loaders。
+
+### 治理
+
+- 扩展配置 source 文档与回归测试，锁定嵌套 key 展开、last-wins merge、source report path/value keys 和 secret redaction 行为。
+
 ## v0.1.1 - 2026-06-01
 
 ### 治理
