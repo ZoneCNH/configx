@@ -4,8 +4,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/bytechainx/configx/internal/sanitize"
-	"github.com/bytechainx/configx/internal/validation"
+	"github.com/ZoneCNH/configx/internal/sanitize"
+	"github.com/ZoneCNH/configx/internal/validation"
 )
 
 type Config struct {

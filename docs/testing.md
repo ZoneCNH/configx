@@ -77,7 +77,7 @@
 - 生命周期 metrics 和健康 metrics。
 - `contracts/` 与公共常量同步。
 - `contracts/config.schema.json` 与 `Config` 字段映射同步。
-- `scripts/render_template.sh` 生成的临时 `foundationx` 可以通过 `GOWORK=off go test ./...`。
+- `scripts/render_template.sh` 生成的临时 ZoneCNH 基础库可以通过 `GOWORK=off go test ./...`。
 - `Config.Sanitize` 的 secret 不变量必须由 property test 覆盖。
 - `Config` 边界输入必须由 fuzz-smoke 覆盖。
 - `HealthStatus` JSON 公共输出必须由 golden test 锁定。

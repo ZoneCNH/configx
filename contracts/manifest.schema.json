@@ -4,7 +4,7 @@
   "type": "object",
   "required": ["module", "version", "commit", "tree_state", "checks", "contracts", "artifacts"],
   "properties": {
-    "module": { "const": "github.com/bytechainx/configx" },
+    "module": { "const": "github.com/ZoneCNH/configx" },
     "version": { "type": "string" },
     "commit": { "type": "string" },
     "tree_state": { "enum": ["clean", "dirty"] },

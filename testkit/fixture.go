@@ -3,7 +3,7 @@ package testkit
 import (
 	"time"
 
-	"github.com/bytechainx/configx/pkg/configx"
+	"github.com/ZoneCNH/configx/pkg/configx"
 )
 
 func Config(name string) configx.Config {

@@ -5,12 +5,16 @@
   "required": ["kind", "op", "message", "retryable"],
   "properties": {
     "kind": {
+      "type": "string",
       "enum": [
         "auth",
+        "already_exists",
+        "canceled",
         "config",
         "conflict",
         "connection",
         "internal",
+        "not_found",
         "rate_limit",
         "timeout",
         "unavailable",

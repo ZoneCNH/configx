@@ -2,13 +2,14 @@ package contracts
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
 	"testing"
 	"time"
 
-	foundationx "github.com/bytechainx/foundationx"
+	foundationx "github.com/ZoneCNH/foundationx"
 )
 
 func TestFoundationXCompatibilitySurface(t *testing.T) {
@@ -50,6 +51,38 @@ func TestFoundationXCompatibilitySurface(t *testing.T) {
 	}
 }
 
+func TestFoundationXErrorFormattingMatchesUpstream(t *testing.T) {
+	cause := errors.New("cause")
+	tests := []struct {
+		name string
+		err  error
+		want string
+	}{
+		{
+			name: "operation",
+			err:  foundationx.NewError(foundationx.ErrorKindValidation, "Config.Validate", "bad value"),
+			want: "validation: Config.Validate: bad value",
+		},
+		{
+			name: "no operation",
+			err:  foundationx.NewError(foundationx.ErrorKindValidation, "", "bad value"),
+			want: "validation: bad value",
+		},
+		{
+			name: "empty message does not fall back to cause",
+			err:  foundationx.WrapError(foundationx.ErrorKindValidation, "Config.Validate", "", cause),
+			want: "validation: Config.Validate: ",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.err.Error(); got != tt.want {
+				t.Fatalf("Error() = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestFoundationXSecretAndUtilityContracts(t *testing.T) {
 	const raw = "super-secret"
 	secret := foundationx.NewSecretString(raw)
@@ -85,10 +118,21 @@ func TestFoundationXSecretAndUtilityContracts(t *testing.T) {
 
 func TestFoundationXHealthLifecycleAndVersionContracts(t *testing.T) {
 	now := time.Date(2026, 6, 1, 0, 0, 0, 0, time.UTC)
-	status := foundationx.NewHealthStatus("config", foundationx.HealthHealthy, "ok", now, 7).
-		WithMetadata("source", "explicit")
-	if !status.IsHealthy() || status.Metadata["source"] != "explicit" || !status.CheckedAt.Equal(now) {
+	baseStatus := foundationx.NewHealthStatus("config", foundationx.HealthHealthy, "ok", now, 7)
+	baseStatus.Metadata["existing"] = "keep"
+	status := baseStatus.WithMetadata("source", "explicit")
+	if _, ok := baseStatus.Metadata["source"]; ok {
+		t.Fatalf("WithMetadata mutated original metadata: %#v", baseStatus.Metadata)
+	}
+	if !status.IsHealthy() || status.Metadata["existing"] != "keep" || status.Metadata["source"] != "explicit" || !status.CheckedAt.Equal(now) {
 		t.Fatalf("unexpected health status: %#v", status)
+	}
+	encodedStatus, err := json.Marshal(foundationx.HealthStatus{Name: "empty", Status: foundationx.HealthHealthy})
+	if err != nil {
+		t.Fatalf("json.Marshal(HealthStatus): %v", err)
+	}
+	if !strings.Contains(string(encodedStatus), `"metadata":{}`) {
+		t.Fatalf("HealthStatus JSON metadata = %s, want empty object", encodedStatus)
 	}
 	var _ foundationx.HealthChecker = staticFoundationHealthChecker{}
 	if got := (staticFoundationHealthChecker{}).Check(context.Background()); got.Status != foundationx.HealthHealthy {
@@ -107,8 +151,8 @@ func TestFoundationXHealthLifecycleAndVersionContracts(t *testing.T) {
 		t.Fatalf("lifecycle flags = started:%v closed:%v", lifecycle.started, lifecycle.closed)
 	}
 
-	version := foundationx.NewVersionInfo("github.com/bytechainx/foundationx", "v0.0.0", "abcdef0", now.Format(time.RFC3339), "go1.23")
-	if version.Module != "github.com/bytechainx/foundationx" || version.Version != "v0.0.0" {
+	version := foundationx.NewVersionInfo("github.com/ZoneCNH/foundationx", "v0.0.0", "abcdef0", now.Format(time.RFC3339), "go1.23")
+	if version.Module != "github.com/ZoneCNH/foundationx" || version.Version != "v0.0.0" {
 		t.Fatalf("unexpected version info: %#v", version)
 	}
 }

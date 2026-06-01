@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	foundationx "github.com/bytechainx/foundationx"
+	foundationx "github.com/ZoneCNH/foundationx"
 )
 
 func TestFoundationxCompatibilitySurface(t *testing.T) {
@@ -71,7 +71,7 @@ func TestFoundationxCompatibilitySurface(t *testing.T) {
 	if !clock.Now().Equal(now) {
 		t.Fatalf("fixed clock returned %s", clock.Now())
 	}
-	info := foundationx.NewVersionInfo("github.com/bytechainx/foundationx", "v0.1.0", "deadbeef", "2026-06-01T00:00:00Z", "go1.23")
+	info := foundationx.NewVersionInfo("github.com/ZoneCNH/foundationx", "v0.1.0", "deadbeef", "2026-06-01T00:00:00Z", "go1.23")
 	if !strings.Contains(info.String(), "foundationx v0.1.0") {
 		t.Fatalf("version string mismatch: %s", info.String())
 	}

@@ -35,7 +35,7 @@ func (s SecretString) String() string {
 	return redacted
 }
 
-func (s SecretString) Reveal() string                { return string(s) }
+func (s SecretString) Reveal() string               { return string(s) }
 func (s SecretString) Sanitize() any                { return s.String() }
 func (s SecretString) IsZero() bool                 { return s == "" }
 func (s SecretString) GoString() string             { return s.String() }
@@ -72,17 +72,10 @@ func (e *Error) Error() string {
 	if e == nil {
 		return ""
 	}
-	message := string(e.Kind)
-	if e.Op != "" {
-		message += ": " + e.Op
+	if e.Op == "" {
+		return fmt.Sprintf("%s: %s", e.Kind, e.Message)
 	}
-	if e.Message != "" {
-		message += ": " + e.Message
-	}
-	if e.Message == "" && e.Cause != nil {
-		message += ": " + e.Cause.Error()
-	}
-	return message
+	return fmt.Sprintf("%s: %s: %s", e.Kind, e.Op, e.Message)
 }
 
 func (e *Error) Unwrap() error {
@@ -170,13 +163,22 @@ func NewHealthStatus(name string, status HealthStatusValue, message string, chec
 	}
 }
 func (s HealthStatus) WithMetadata(key, value string) HealthStatus {
-	if s.Metadata == nil {
-		s.Metadata = map[string]string{}
+	metadata := make(map[string]string, len(s.Metadata)+1)
+	for existingKey, existingValue := range s.Metadata {
+		metadata[existingKey] = existingValue
 	}
-	s.Metadata[key] = value
+	metadata[key] = value
+	s.Metadata = metadata
 	return s
 }
 func (s HealthStatus) IsHealthy() bool { return s.Status == HealthHealthy }
+func (s HealthStatus) MarshalJSON() ([]byte, error) {
+	type healthStatus HealthStatus
+	if s.Metadata == nil {
+		s.Metadata = map[string]string{}
+	}
+	return json.Marshal(healthStatus(s))
+}
 
 type Starter interface {
 	Start(ctx context.Context) error

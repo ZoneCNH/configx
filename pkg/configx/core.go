@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	foundationx "github.com/bytechainx/foundationx"
+	foundationx "github.com/ZoneCNH/foundationx"
 )
 
 const redactionMarker = "***"

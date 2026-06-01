@@ -8,15 +8,18 @@ import (
 type ErrorKind string
 
 const (
-	ErrorKindConfig      ErrorKind = "config"
-	ErrorKindValidation  ErrorKind = "validation"
-	ErrorKindConnection  ErrorKind = "connection"
-	ErrorKindUnavailable ErrorKind = "unavailable"
-	ErrorKindTimeout     ErrorKind = "timeout"
-	ErrorKindAuth        ErrorKind = "auth"
-	ErrorKindConflict    ErrorKind = "conflict"
-	ErrorKindRateLimit   ErrorKind = "rate_limit"
-	ErrorKindInternal    ErrorKind = "internal"
+	ErrorKindConfig        ErrorKind = "config"
+	ErrorKindValidation    ErrorKind = "validation"
+	ErrorKindConnection    ErrorKind = "connection"
+	ErrorKindUnavailable   ErrorKind = "unavailable"
+	ErrorKindTimeout       ErrorKind = "timeout"
+	ErrorKindAuth          ErrorKind = "auth"
+	ErrorKindConflict      ErrorKind = "conflict"
+	ErrorKindRateLimit     ErrorKind = "rate_limit"
+	ErrorKindCanceled      ErrorKind = "canceled"
+	ErrorKindNotFound      ErrorKind = "not_found"
+	ErrorKindAlreadyExists ErrorKind = "already_exists"
+	ErrorKindInternal      ErrorKind = "internal"
 )
 
 type Error struct {

@@ -49,6 +49,7 @@ var contractFiles = []string{
 	"contracts/config.schema.json",
 	"contracts/error.schema.json",
 	"contracts/health.schema.json",
+	"contracts/version.schema.json",
 	"contracts/metrics.md",
 }
 
@@ -98,10 +99,11 @@ func main() {
 	verify := flag.String("verify", "", "verify an existing release manifest instead of generating one")
 	requirePassed := flag.Bool("require-passed", false, "require all release checks to be passed during verification")
 	requireClean := flag.Bool("require-clean", false, "require a clean git tree during verification")
+	expectVersion := flag.String("expect-version", "", "require the manifest version to match this value during verification")
 	flag.Parse()
 
 	if *verify != "" {
-		if err := verifyManifest(*verify, *requirePassed, *requireClean); err != nil {
+		if err := verifyManifest(*verify, *requirePassed, *requireClean, *expectVersion); err != nil {
 			fmt.Fprintf(os.Stderr, "ERROR: %v\n", err)
 			os.Exit(1)
 		}
@@ -169,7 +171,7 @@ func buildManifest() (Manifest, error) {
 	}, nil
 }
 
-func verifyManifest(path string, requirePassed bool, requireClean bool) error {
+func verifyManifest(path string, requirePassed bool, requireClean bool, expectVersion string) error {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return err
@@ -201,6 +203,9 @@ func verifyManifest(path string, requirePassed bool, requireClean bool) error {
 	}
 	if got.Module != current.Module {
 		failures = append(failures, fmt.Sprintf("module mismatch: got %q, want %q", got.Module, current.Module))
+	}
+	if expectVersion = strings.TrimSpace(expectVersion); expectVersion != "" && got.Version != expectVersion {
+		failures = append(failures, fmt.Sprintf("version mismatch: got %q, want %q", got.Version, expectVersion))
 	}
 	if got.Commit != current.Commit {
 		failures = append(failures, fmt.Sprintf("commit mismatch: got %q, want %q", got.Commit, current.Commit))

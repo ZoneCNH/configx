@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bytechainx/configx/pkg/configx"
-	"github.com/bytechainx/configx/testkit"
+	"github.com/ZoneCNH/configx/pkg/configx"
+	"github.com/ZoneCNH/configx/testkit"
 )
 
 func TestHealthStatusJSONGolden(t *testing.T) {

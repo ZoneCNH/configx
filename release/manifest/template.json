@@ -1,7 +1,13 @@
 {
-  "module": "github.com/bytechainx/configx",
+  "module": "github.com/ZoneCNH/configx",
   "version": "v0.1.0",
   "commit": "{{COMMIT}}",
+  "tree_sha": "{{TREE_SHA}}",
+  "source_digest": "{{SOURCE_DIGEST}}",
+  "tracked_file_count": 0,
+  "go_version": "{{GO_VERSION}}",
+  "generated_at": "{{GENERATED_AT}}",
+  "generated_by": "scripts/generate_manifest.sh",
   "tree_state": "{{TREE_STATE}}",
   "checks": {
     "fmt": "{{CHECK_STATUS}}",
@@ -9,18 +15,21 @@
     "lint": "{{CHECK_STATUS}}",
     "unit_test": "{{CHECK_STATUS}}",
     "race_test": "{{CHECK_STATUS}}",
-    "contract": "{{CHECK_STATUS}}",
+    "boundary": "{{CHECK_STATUS}}",
     "secret_scan": "{{CHECK_STATUS}}",
     "security": "{{CHECK_STATUS}}",
+    "contract": "{{CHECK_STATUS}}",
     "integration": "{{CHECK_STATUS}}"
   },
   "contracts": [
     { "path": "contracts/config.schema.json", "sha256": "{{CONFIG_SCHEMA_SHA256}}" },
     { "path": "contracts/error.schema.json", "sha256": "{{ERROR_SCHEMA_SHA256}}" },
-    { "path": "contracts/manifest.schema.json", "sha256": "{{MANIFEST_SCHEMA_SHA256}}" }
+    { "path": "contracts/health.schema.json", "sha256": "{{HEALTH_SCHEMA_SHA256}}" },
+    { "path": "contracts/version.schema.json", "sha256": "{{VERSION_SCHEMA_SHA256}}" },
+    { "path": "contracts/metrics.md", "sha256": "{{METRICS_SHA256}}" }
   ],
   "dependencies": [
-    { "path": "github.com/bytechainx/configx", "main": true }
+    { "path": "github.com/ZoneCNH/configx", "main": true }
   ],
   "tools": {
     "go": "{{GO_VERSION}}",

@@ -2,22 +2,26 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Health Status",
   "type": "object",
+  "additionalProperties": false,
   "required": ["name", "status", "checked_at"],
   "properties": {
     "name": {
       "type": "string"
     },
     "status": {
+      "type": "string",
       "enum": ["healthy", "degraded", "unhealthy"]
     },
     "message": {
       "type": "string"
     },
     "checked_at": {
-      "type": "string"
+      "type": "string",
+      "format": "date-time"
     },
     "latency_ms": {
-      "type": "integer"
+      "type": "integer",
+      "minimum": 0
     },
     "metadata": {
       "type": "object",

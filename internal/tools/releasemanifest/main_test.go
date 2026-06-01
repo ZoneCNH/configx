@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -55,4 +56,64 @@ func TestFileDigestRecordsPathAndSHA256(t *testing.T) {
 	if digest.SHA256 != want {
 		t.Fatalf("sha256 = %q, want %q", digest.SHA256, want)
 	}
+}
+
+func TestVerifyManifestRejectsExpectedVersionMismatch(t *testing.T) {
+	t.Setenv("CHECK_STATUS", "passed")
+	chdir(t, repoRoot(t))
+
+	manifest, err := buildManifest()
+	if err != nil {
+		t.Fatal(err)
+	}
+	manifest.Version = "v1.2.3"
+
+	path := filepath.Join(t.TempDir(), "manifest.json")
+	if err := writeManifest(path, manifest); err != nil {
+		t.Fatal(err)
+	}
+
+	err = verifyManifest(path, false, false, "v9.9.9")
+	if err == nil {
+		t.Fatal("verifyManifest() succeeded, want version mismatch error")
+	}
+	if !strings.Contains(err.Error(), `version mismatch: got "v1.2.3", want "v9.9.9"`) {
+		t.Fatalf("verifyManifest() error = %v, want version mismatch", err)
+	}
+}
+
+func repoRoot(t *testing.T) string {
+	t.Helper()
+
+	dir, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for {
+		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+			return dir
+		}
+		next := filepath.Dir(dir)
+		if next == dir {
+			t.Fatal("could not find repo root")
+		}
+		dir = next
+	}
+}
+
+func chdir(t *testing.T, dir string) {
+	t.Helper()
+
+	previous, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chdir(dir); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		if err := os.Chdir(previous); err != nil {
+			t.Fatalf("restore working directory: %v", err)
+		}
+	})
 }

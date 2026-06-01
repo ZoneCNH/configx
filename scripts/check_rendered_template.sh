@@ -77,7 +77,7 @@ scan_fixed() {
 }
 
 scan_regex '\{\{MODULE_NAME\}\}|\{\{MODULE_PATH\}\}|\{\{PACKAGE_NAME\}\}' "template placeholder"
-scan_fixed "github.com/bytechainx/configx" "module path"
+scan_fixed "github.com/ZoneCNH/configx" "module path"
 
 if [[ "$module_name" != "configx" ]]; then
   scan_fixed "configx" "module name"

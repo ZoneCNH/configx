@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/bytechainx/configx/pkg/configx"
+	"github.com/ZoneCNH/configx/pkg/configx"
 )
 
 func main() {

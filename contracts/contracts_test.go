@@ -9,18 +9,21 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bytechainx/configx/pkg/configx"
+	"github.com/ZoneCNH/configx/pkg/configx"
+	foundationx "github.com/ZoneCNH/foundationx"
 )
 
 type schemaProperty struct {
 	Type    string   `json:"type"`
+	Format  string   `json:"format"`
 	Enum    []string `json:"enum"`
 	Minimum *int     `json:"minimum"`
 }
 
 type objectSchema struct {
-	Required   []string                  `json:"required"`
-	Properties map[string]schemaProperty `json:"properties"`
+	Required             []string                  `json:"required"`
+	Properties           map[string]schemaProperty `json:"properties"`
+	AdditionalProperties *bool                     `json:"additionalProperties"`
 }
 
 func TestErrorKindContractMatchesPublicConstants(t *testing.T) {
@@ -35,13 +38,20 @@ func TestErrorKindContractMatchesPublicConstants(t *testing.T) {
 		string(configx.ErrorKindAuth),
 		string(configx.ErrorKindConflict),
 		string(configx.ErrorKindRateLimit),
+		string(configx.ErrorKindCanceled),
+		string(configx.ErrorKindNotFound),
+		string(configx.ErrorKindAlreadyExists),
 		string(configx.ErrorKindInternal),
 	)
 	actual := sortedStrings(schema.Properties["kind"].Enum...)
 	if !reflect.DeepEqual(actual, expected) {
 		t.Fatalf("error kind contract drift:\nactual:   %#v\nexpected: %#v", actual, expected)
 	}
+	requireNoAdditionalProperties(t, schema)
 	requireFields(t, schema.Required, "kind", "op", "message", "retryable")
+	if kindType := schema.Properties["kind"].Type; kindType != "string" {
+		t.Fatalf("error kind schema type = %q, want string", kindType)
+	}
 }
 
 func TestHealthStatusContractMatchesPublicConstants(t *testing.T) {
@@ -56,7 +66,17 @@ func TestHealthStatusContractMatchesPublicConstants(t *testing.T) {
 	if !reflect.DeepEqual(actual, expected) {
 		t.Fatalf("health status contract drift:\nactual:   %#v\nexpected: %#v", actual, expected)
 	}
+	requireNoAdditionalProperties(t, schema)
 	requireFields(t, schema.Required, "name", "status", "checked_at")
+	if statusType := schema.Properties["status"].Type; statusType != "string" {
+		t.Fatalf("health status schema type = %q, want string", statusType)
+	}
+	if checkedAtFormat := schema.Properties["checked_at"].Format; checkedAtFormat != "date-time" {
+		t.Fatalf("checked_at schema format = %q, want date-time", checkedAtFormat)
+	}
+	if minimum := schema.Properties["latency_ms"].Minimum; minimum == nil || *minimum != 0 {
+		t.Fatalf("latency_ms must define minimum 0, got %#v", minimum)
+	}
 }
 
 func TestConfigContractMatchesPublicConfig(t *testing.T) {
@@ -99,6 +119,19 @@ func TestMetricsContractDocumentsPublicConstants(t *testing.T) {
 	}
 }
 
+func TestVersionContractMatchesFoundationXVersionInfo(t *testing.T) {
+	schema := readSchema(t, "version.schema.json")
+	requireNoAdditionalProperties(t, schema)
+	requireFields(t, schema.Required, "module", "version", "commit", "build_time", "go_version")
+
+	versionType := reflect.TypeOf(foundationx.VersionInfo{})
+	requireSchemaFieldMapsToStructField(t, schema, versionType, "module", "Module", "string")
+	requireSchemaFieldMapsToStructField(t, schema, versionType, "version", "Version", "string")
+	requireSchemaFieldMapsToStructField(t, schema, versionType, "commit", "Commit", "string")
+	requireSchemaFieldMapsToStructField(t, schema, versionType, "build_time", "BuildTime", "string")
+	requireSchemaFieldMapsToStructField(t, schema, versionType, "go_version", "GoVersion", "string")
+}
+
 func requireSchemaFieldMapsToStructField(t *testing.T, schema objectSchema, structType reflect.Type, schemaField string, structField string, schemaType string) {
 	t.Helper()
 
@@ -111,6 +144,13 @@ func requireSchemaFieldMapsToStructField(t *testing.T, schema objectSchema, stru
 	}
 	if _, ok := structType.FieldByName(structField); !ok {
 		t.Fatalf("%s missing field %s required by schema property %q", structType.Name(), structField, schemaField)
+	}
+}
+
+func requireNoAdditionalProperties(t *testing.T, schema objectSchema) {
+	t.Helper()
+	if schema.AdditionalProperties == nil || *schema.AdditionalProperties {
+		t.Fatalf("schema must set additionalProperties false, got %#v", schema.AdditionalProperties)
 	}
 }
 

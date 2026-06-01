@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/bytechainx/configx/pkg/configx"
+	"github.com/ZoneCNH/configx/pkg/configx"
 )
 
 type appConfig struct {

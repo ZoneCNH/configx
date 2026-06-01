@@ -9,7 +9,7 @@ import (
 
 func TestMainPrintsModuleName(t *testing.T) {
 	output := captureStdout(t, main)
-	if output != "github.com/bytechainx/configx\n" {
+	if output != "github.com/ZoneCNH/configx\n" {
 		t.Fatalf("unexpected output: %q", output)
 	}
 }

@@ -24,5 +24,5 @@
 - 公共错误必须使用 `Error`、`NewError` 或 `WrapError` 表达稳定 contract。
 - 包装错误必须保留 cause，使调用方可以使用 `errors.Is` / `errors.As`。
 - 调用方按 `IsKind(err, ErrorKind...)` 做分支判断，不依赖错误字符串。
-- 错误可以安全纳入 Evidence，但不得包含原始凭据、生产连接串或业务私密数据。
+- 错误可以安全纳入证据，但不得包含原始凭据、生产连接串或业务私密数据。
 - 生成的库不得使用 `x.go` 业务模型。

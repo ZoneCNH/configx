@@ -11,4 +11,8 @@ if [[ "${RELEASE_EVIDENCE_REQUIRE_CLEAN:-0}" == "1" ]]; then
   args+=(--require-clean)
 fi
 
+if [[ -n "${VERSION:-}" ]]; then
+  args+=(--expect-version "$VERSION")
+fi
+
 go run ./internal/tools/releasemanifest "${args[@]}"

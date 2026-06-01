@@ -1,16 +1,16 @@
 # configx
 
-`configx` 是面向 ByteChainX services 和 libraries 的显式、dependency-light Go configuration base library。它提供 environment variables、env files、JSON files 和 in-memory maps 的 typed loaders，支持确定性的 source merging、struct decoding、validation hooks，以及面向 logs、health output 和 release evidence 的安全 sanitization。
+`configx` 是面向 ZoneCNH 服务与库的显式、轻依赖 Go 配置基础库。它提供环境变量、env 文件、JSON 文件与内存映射的类型化加载器，支持可预测的 source 合并、结构体解码、校验 hooks，以及面向日志、health 输出和发布证据的安全脱敏。
 
-该 library 有意保持显式：每个 source 和 path 都由调用方选择。它不会自动发现 config files，不会创建 global configuration state，不会注册 singletons，不会 import driver packages，也不会依赖任何 `x.go` module。
+该库有意保持显式：每个 source 和路径都由调用方选择。它不会自动发现配置文件，不会创建全局配置状态，不会注册单例，不会导入 driver packages，也不会依赖任何 `x.go` module。
 
 ## 目标
 
-- 只从调用方提供的 sources 加载 configuration。
-- 使用 last-wins 语义以可预测方式 merge sources。
-- 使用 `config`、`default` 和 `required` tags decode 到调用方拥有的 structs。
-- 在 values 被记录到 log 或 serialized 之前标记并 redact 类似 secret 的 keys。
-- 保留 errors、health、metrics、tests、CI 和 release evidence 的稳定 base-library contracts。
+- 只从调用方提供的 sources 加载配置。
+- 使用 last-wins 语义以可预测方式合并 sources。
+- 使用 `config`、`default` 和 `required` tags 解码到调用方拥有的 structs。
+- 在 values 被记录到日志或序列化之前，标记并脱敏类似 secret 的 keys。
+- 保留 errors、health、metrics、tests、CI 和发布证据所需的稳定基础库契约。
 
 ## 快速开始
 
@@ -36,25 +36,25 @@ if err := configx.Decode(result, &cfg); err != nil {
     return err
 }
 
-safe := result.Sanitize() // secret values are redacted
+safe := result.Sanitize() // secret 值已脱敏
 ```
 
 ## 公共 API 范围
 
-- `NewLoader`、`Loader.AddSource`、`Loader.Load`：构建并运行显式 source pipelines。
-- `NewEnvSource`、`NewAllEnvSource`、`NewEnvFileSource`、`NewJSONFileSource`、`NewMapSource`：具体 source adapters。
-- `LoadResult`、`Value`、`SourceReport`、`SanitizedResult`：检查已加载 values 与 source evidence。
+- `NewLoader`、`Loader.AddSource`、`Loader.Load`：构建并运行显式 source 管线。
+- `NewEnvSource`、`NewAllEnvSource`、`NewEnvFileSource`、`NewJSONFileSource`、`NewMapSource`：具体 source 适配器。
+- `LoadResult`、`Value`、`SourceReport`、`SanitizedResult`：检查已加载 values 与 source 证据。
 - `Decode`：从 `LoadResult` 填充调用方 structs。
-- `SecretString`、`NewSecretString`、`IsSecretKey`：由 `foundationx` compatibility 支持的 secret handling helpers。
-- `Config`、`New`、`Close`、`HealthCheck`、`Error`、`Metrics`：从 baselib template 保留的 baseline library contracts。
+- `SecretString`、`NewSecretString`、`IsSecretKey`：由 `foundationx` compatibility 支持的 secret 处理 helpers。
+- `Config`、`New`、`Close`、`HealthCheck`、`Error`、`Metrics`：从 baselib template 保留的基础库契约。
 
 ## 非目标
 
-- 不做 implicit config discovery。
-- 不提供 process-wide mutable configuration singleton。
-- 不引入 hidden driver dependencies。
-- 不在 sanitized output 中出现 secret values。
-- 不依赖 `github.com/bytechainx/x.go`、`github.com/ZoneCNH/x.go` 或 internal `x.go` packages。
+- 不做隐式配置发现。
+- 不提供进程级可变配置单例。
+- 不引入隐藏驱动依赖。
+- 不在脱敏输出中出现原始 secret 值。
+- 不依赖 `github.com/bytechainx/x.go`、`github.com/ZoneCNH/x.go` 或内部 `x.go` packages。
 
 ## 命令
 
@@ -68,13 +68,13 @@ GOWORK=off make contracts
 GOWORK=off ./scripts/check_secrets.sh
 ```
 
-`make lint` 需要 `golangci-lint`；`make security` 需要 `govulncheck` 和本地 secret scanner。CI 应显式安装这些 tools。
+`make lint` 需要 `golangci-lint`；`make security` 需要 `govulncheck` 和本地密钥扫描工具。CI 应显式安装这些工具。
 
 ## 文档
 
-- [Goal](docs/goal.md)：权威 product 目标和 acceptance criteria。
-- [API](docs/api.md)：公共 configuration API 与 contracts。
-- [Config](docs/config.md)：source、merge、decode、validation 和 sanitization 规则。
-- [foundationx compatibility](docs/foundationx-compatibility.md)：local compatibility boundary 与 upgrade rule。
-- [Testing](docs/testing.md)：unit、contract、race、boundary、security 和 release evidence gates。
-- [Release](docs/release.md)：release manifest 与 evidence 要求。
+- [目标](docs/goal.md)：权威产品目标和验收标准。
+- [API](docs/api.md)：公共配置 API 与契约。
+- [配置](docs/config.md)：source、merge、decode、validation 和 sanitization 规则。
+- [foundationx 兼容性](docs/foundationx-compatibility.md)：本地兼容边界与升级规则。
+- [测试](docs/testing.md)：unit、contract、race、boundary、security 和发布证据 Gate。
+- [发布](docs/release.md)：release manifest 与证据要求。
