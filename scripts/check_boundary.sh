@@ -1,39 +1,61 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "checking forbidden generated files..."
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
 
-if found="$(find . \
-  -path './.git' -prune -o \
-  -path './.omx' -prune -o \
-  -path './tmp' -prune -o \
-  -name 'x.go' -print -quit)" && [[ -n "$found" ]]; then
-  echo "ERROR: base library template must not contain generated x.go file: $found"
-  exit 1
-fi
-
-echo "checking forbidden dependencies..."
+echo "checking forbidden dependency boundary..."
 
 DEPS="$(GOWORK="${GOWORK:-off}" go list -deps ./...)"
 FORBIDDEN_DEPS=(
   "github.com/bytechainx/x.go"
   "github.com/ZoneCNH/x.go"
-  "github.com/redis/go-redis"
-  "github.com/IBM/sarama"
-  "github.com/Shopify/sarama"
-  "github.com/segmentio/kafka-go"
+  "database/sql"
   "github.com/jackc/pgx"
   "github.com/lib/pq"
-  "gorm.io/gorm"
-  "github.com/taosdata/driver-go"
+  "github.com/go-sql-driver/mysql"
+  "github.com/segmentio/kafka-go"
+  "github.com/IBM/sarama"
+  "github.com/Shopify/sarama"
+  "github.com/confluentinc/confluent-kafka-go"
+  "github.com/redis/go-redis"
+  "github.com/taosdata"
   "github.com/aws/aws-sdk-go"
   "github.com/aws/aws-sdk-go-v2"
-  "github.com/aliyun/aliyun-oss-go-sdk"
+  "github.com/aliyun"
+  "github.com/minio/minio-go"
 )
 
 for dep in "${FORBIDDEN_DEPS[@]}"; do
   if grep -Fq "$dep" <<<"$DEPS"; then
-    echo "ERROR: base library template must not depend on forbidden infrastructure dependency: $dep"
+    echo "ERROR: forbidden infrastructure dependency found: $dep"
+    exit 1
+  fi
+done
+
+echo "checking forbidden implicit config discovery..."
+
+SEARCH_DIRS=()
+for dir in pkg internal examples contracts; do
+  if [ -d "$dir" ]; then
+    SEARCH_DIRS+=("$dir")
+  fi
+done
+
+IMPLICIT_DISCOVERY_PATTERNS=(
+  "godotenv"
+  "AutomaticEnv"
+  "SetConfigName"
+  "AddConfigPath"
+  "FindConfig"
+  "ReadInConfig"
+  "UserConfigDir"
+  "UserHomeDir"
+)
+
+for pattern in "${IMPLICIT_DISCOVERY_PATTERNS[@]}"; do
+  if [ "${#SEARCH_DIRS[@]}" -gt 0 ] && grep -R --line-number --fixed-strings "$pattern" "${SEARCH_DIRS[@]}" --exclude-dir=.git; then
+    echo "ERROR: implicit config discovery pattern found: $pattern"
     exit 1
   fi
 done

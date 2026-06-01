@@ -15,12 +15,40 @@ import (
 
 const redacted = "***"
 
-// Sanitizer describes values that can expose a sanitized representation.
+// Clock abstracts time reads for deterministic tests.
+type Clock interface {
+	Now() time.Time
+}
+
+// RealClock reads the current wall clock time.
+type RealClock struct{}
+
+// Now returns the current time.
+func (RealClock) Now() time.Time {
+	return time.Now()
+}
+
+// FixedClock always returns the same instant.
+type FixedClock struct {
+	now time.Time
+}
+
+// NewFixedClock creates a clock pinned to now.
+func NewFixedClock(now time.Time) FixedClock {
+	return FixedClock{now: now}
+}
+
+// Now returns the fixed instant.
+func (c FixedClock) Now() time.Time {
+	return c.now
+}
+
+// Sanitizer marks values that can return a safe representation of themselves.
 type Sanitizer interface {
 	Sanitize() any
 }
 
-// SecretString stores a secret and masks it by default when formatted.
+// SecretString stores secret material while redacting display and marshal paths.
 type SecretString string
 
 func NewSecretString(value string) SecretString {
@@ -33,11 +61,33 @@ func (s SecretString) String() string {
 	}
 	return redacted
 }
-func (s SecretString) Sanitize() any                { return s.String() }
-func (s SecretString) IsZero() bool                 { return s == "" }
-func (s SecretString) GoString() string             { return s.String() }
-func (s SecretString) MarshalText() ([]byte, error) { return []byte(s.String()), nil }
-func (s SecretString) MarshalJSON() ([]byte, error) { return json.Marshal(s.String()) }
+
+func (s SecretString) GoString() string {
+	return s.String()
+}
+
+func (s SecretString) MarshalText() ([]byte, error) {
+	return []byte(s.String()), nil
+}
+
+func (s SecretString) MarshalJSON() ([]byte, error) {
+	return json.Marshal(s.String())
+}
+
+// Sanitize returns a redacted value suitable for logs and generated evidence.
+func (s SecretString) Sanitize() any {
+	return s.String()
+}
+
+// Reveal returns the raw value for the final integration boundary that needs it.
+func (s SecretString) Reveal() string {
+	return string(s)
+}
+
+// IsZero reports whether the secret is unset.
+func (s SecretString) IsZero() bool {
+	return s == ""
+}
 
 type ErrorKind string
 
