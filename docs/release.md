@@ -1,25 +1,25 @@
 # configx release evidence
 
-A release or completion claim for `configx` must be `DONE with evidence:` and include fresh local or CI results.
+`configx` 的 release 或 completion claim 必须写成 `DONE with evidence:`，并包含最新 local 或 CI results。
 
 ## Required gates
 
-Before release:
+Release 前需要满足：
 
-- formatting and vetting pass
-- lint pass for modified Go files
-- unit tests for loaders, merge precedence, decode, validation, and sanitization
-- race tests for loader/result paths with shared readers if concurrency is supported
-- contract checks for config schema, error envelope, and release manifest
-- secret scan over source, docs, tests, and generated evidence
-- vulnerability scan after dependencies are introduced
+- formatting 和 vetting 通过
+- modified Go files 的 lint 通过
+- loaders、merge precedence、decode、validation 和 sanitization 的 unit tests 通过
+- 如果支持 concurrency，loader/result paths with shared readers 的 race tests 通过
+- config schema、error envelope 和 release manifest 的 contract checks 通过
+- 对 source、docs、tests 和 generated evidence 执行 secret scan
+- 引入 dependencies 后执行 vulnerability scan
 
 ## Evidence manifest
 
-`release/manifest/template.json` defines the required release evidence shape. Generated manifests must contain only sanitized data and must not include raw config values.
+`release/manifest/template.json` 定义所需 release evidence shape。Generated manifests 只能包含 sanitized data，不得包含 raw config values。
 
-Required manifest fields include module path, version, commit, tree state, checks, contract hashes, dependencies, tools, artifacts, and known risks.
+Required manifest fields 包括 module path、version、commit、tree state、checks、contract hashes、dependencies、tools、artifacts 和 known risks。
 
 ## CI expectation
 
-CI should run the same gates as local release checks. Missing required tools such as `golangci-lint` or `govulncheck` should fail the relevant gate instead of silently skipping it.
+CI 应运行与 local release checks 相同的 gates。缺少 `golangci-lint` 或 `govulncheck` 等 required tools 时，应让相关 gate 失败，而不是 silent skip。

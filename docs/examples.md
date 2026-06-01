@@ -1,8 +1,8 @@
 # configx examples
 
-These examples describe the intended caller-owned usage. They avoid package globals and implicit discovery.
+这些 examples 描述预期的 caller-owned 用法。它们避免 package globals 和 implicit discovery。
 
-## Explicit env file path
+## 显式 env file path
 
 ```go
 ctx := context.Background()
@@ -19,7 +19,7 @@ if err := configx.Decode(result, &cfg); err != nil {
 }
 ```
 
-The path is supplied by the application. `configx` must not search this directory on its own.
+path 由 application 提供。`configx` 不得自行搜索该 directory。
 
 ## Map override precedence
 
@@ -31,7 +31,7 @@ result, err := loader.
     Load(ctx)
 ```
 
-Later sources have higher precedence when the implementation chooses this ordering convention; the merge trace must make the chosen value and source visible.
+当实现选择这种 ordering convention 时，后面的 sources 具有更高 precedence；merge trace 必须让被选中的 value 和 source 可见。
 
 ## Sanitized diagnostics
 
@@ -40,4 +40,4 @@ safe := configx.Sanitize(result)
 logger.Info("config loaded", "config", safe)
 ```
 
-Secrets must render as redacted placeholders, never as raw credential material.
+Secrets 必须渲染为 redacted placeholders，绝不能输出 raw credential material。
