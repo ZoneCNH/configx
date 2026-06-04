@@ -222,3 +222,61 @@ func TestDecodeErrorDoesNotExposeSecretValue(t *testing.T) {
 		t.Fatalf("secret leaked in cause: %v", cause)
 	}
 }
+
+func TestDecodeNestedStructAndValidationHookRedactsSecretCause(t *testing.T) {
+	type databaseConfig struct {
+		Host     string       `config:"host" default:"localhost"`
+		Password SecretString `config:"password" required:"true" secret:"true"`
+	}
+	type nestedConfig struct {
+		Database databaseConfig `config:"database"`
+		Retries  int            `config:"retries" default:"3"`
+	}
+	result := LoadResult{Values: Map{
+		"database.password": {Key: "database.password", Value: "nested-secret", Secret: true, Source: "test"},
+	}}
+	var cfg nestedConfig
+	if err := Decode(result, &cfg); err != nil {
+		t.Fatal(err)
+	}
+	if cfg.Database.Host != "localhost" || cfg.Database.Password.Reveal() != "nested-secret" || cfg.Retries != 3 {
+		t.Fatalf("decoded %#v", cfg)
+	}
+	if cfg.Database.Password.String() != redactionMarker {
+		t.Fatalf("secret string leaked: %s", cfg.Database.Password.String())
+	}
+
+	type validatingConfig struct {
+		Password SecretString `config:"password" required:"true" secret:"true"`
+	}
+	funcValidate := validatingConfig{Password: NewSecretString("nested-secret")}
+	_ = funcValidate
+}
+
+type validationRedactionConfig struct {
+	Password SecretString `config:"password" required:"true" secret:"true"`
+}
+
+func (c validationRedactionConfig) Validate() error {
+	return errors.New("password=" + c.Password.Reveal() + " rejected")
+}
+
+func TestDecodeValidationHookDoesNotExposeSecretValue(t *testing.T) {
+	result := LoadResult{Values: Map{
+		"password": {Key: "password", Value: "validator-secret", Secret: true, Source: "test"},
+	}}
+	var cfg validationRedactionConfig
+	err := Decode(result, &cfg)
+	if err == nil {
+		t.Fatal("expected validation error")
+	}
+	if strings.Contains(err.Error(), "validator-secret") {
+		t.Fatalf("secret leaked in validation error: %v", err)
+	}
+	if cause := errors.Unwrap(err); cause != nil && strings.Contains(cause.Error(), "validator-secret") {
+		t.Fatalf("secret leaked in validation cause: %v", cause)
+	}
+	if !strings.Contains(err.Error(), "validation failed") {
+		t.Fatalf("expected sanitized validation wrapper, got %v", err)
+	}
+}
