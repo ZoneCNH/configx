@@ -21,6 +21,7 @@ for pattern in "${patterns[@]}"; do
   if grep -R -n -E "$pattern" . \
     --exclude-dir=.git \
     --exclude-dir=.omx \
+    --exclude-dir=.worktree \
     --exclude-dir=vendor \
     --exclude='*.sum' \
     --exclude='check_secrets.sh' \

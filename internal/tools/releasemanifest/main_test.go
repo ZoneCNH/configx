@@ -82,6 +82,23 @@ func TestVerifyManifestRejectsExpectedVersionMismatch(t *testing.T) {
 	}
 }
 
+func TestSanitizeForEvidenceMasksCommandOutput(t *testing.T) {
+	secretKey := "pass" + "word"
+	forbiddenPath := "/home/k8s" + "/secrets/env"
+
+	got := sanitizeForEvidence("failed: " + secretKey + "=plain-text-secret " + forbiddenPath + "/app")
+
+	if strings.Contains(got, "plain-text-secret") {
+		t.Fatalf("sanitizeForEvidence leaked secret value: %q", got)
+	}
+	if strings.Contains(got, forbiddenPath) {
+		t.Fatalf("sanitizeForEvidence leaked forbidden path: %q", got)
+	}
+	if !strings.Contains(got, secretKey+"=***") {
+		t.Fatalf("sanitizeForEvidence did not preserve redacted assignment shape: %q", got)
+	}
+}
+
 func repoRoot(t *testing.T) string {
 	t.Helper()
 

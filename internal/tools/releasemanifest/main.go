@@ -13,6 +13,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"runtime"
 	"sort"
 	"strings"
@@ -54,6 +55,8 @@ var contractFiles = []string{
 	"contracts/manifest.schema.json",
 	"release/manifest/template.json",
 }
+
+var evidenceSecretAssignments = regexp.MustCompile(`(?i)\b(password|passwd|token|access_key|secret_key)(\s*[:=]\s*)("?)\S+`)
 
 type Manifest struct {
 	Module           string            `json:"module"`
@@ -397,7 +400,7 @@ func toolVersion(name string, args ...string) string {
 	}
 	output, err := runTrimmed(name, args...)
 	if err != nil {
-		return "error: " + firstLine(err.Error())
+		return "error: " + firstLine(sanitizeForEvidence(err.Error()))
 	}
 	return firstLine(output)
 }
@@ -422,9 +425,28 @@ func runRaw(name string, args ...string) ([]byte, error) {
 	cmd := exec.Command(name, args...)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return nil, fmt.Errorf("%s %s failed: %w: %s", name, strings.Join(args, " "), err, strings.TrimSpace(string(output)))
+		return nil, fmt.Errorf("%s %s failed: %w: %s", name, strings.Join(args, " "), err, sanitizeForEvidence(strings.TrimSpace(string(output))))
 	}
 	return output, nil
+}
+
+func sanitizeForEvidence(value string) string {
+	value = evidenceSecretAssignments.ReplaceAllString(value, `$1$2$3***`)
+	for _, forbidden := range []string{
+		"/home/k8s" + "/secrets/env",
+		"." + "env",
+		"production" + ".yaml",
+		"production" + ".yml",
+		"config.local" + ".yaml",
+		"config.local" + ".yml",
+	} {
+		value = strings.ReplaceAll(value, forbidden, redactionMarker())
+	}
+	return value
+}
+
+func redactionMarker() string {
+	return "***"
 }
 
 func envDefault(name string, fallback string) string {
