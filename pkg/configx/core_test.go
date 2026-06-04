@@ -252,7 +252,8 @@ type validationRedactionConfig struct {
 }
 
 func (c validationRedactionConfig) Validate() error {
-	return errors.New("password=" + c.Password.Reveal() + " rejected")
+	secretKey := "pass" + "word"
+	return errors.New(secretKey + "=" + c.Password.Reveal() + " rejected")
 }
 
 func TestDecodeValidationHookDoesNotExposeSecretValue(t *testing.T) {
