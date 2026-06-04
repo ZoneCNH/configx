@@ -26,7 +26,9 @@
     { "path": "contracts/error.schema.json", "sha256": "{{ERROR_SCHEMA_SHA256}}" },
     { "path": "contracts/health.schema.json", "sha256": "{{HEALTH_SCHEMA_SHA256}}" },
     { "path": "contracts/version.schema.json", "sha256": "{{VERSION_SCHEMA_SHA256}}" },
-    { "path": "contracts/metrics.md", "sha256": "{{METRICS_SHA256}}" }
+    { "path": "contracts/metrics.md", "sha256": "{{METRICS_SHA256}}" },
+    { "path": "contracts/manifest.schema.json", "sha256": "{{MANIFEST_SCHEMA_SHA256}}" },
+    { "path": "release/manifest/template.json", "sha256": "{{MANIFEST_TEMPLATE_SHA256}}" }
   ],
   "dependencies": [
     { "path": "github.com/ZoneCNH/configx", "main": true }

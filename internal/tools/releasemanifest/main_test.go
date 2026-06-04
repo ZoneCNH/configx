@@ -58,6 +58,28 @@ func TestFileDigestRecordsPathAndSHA256(t *testing.T) {
 	}
 }
 
+func TestContractDigestsIncludeReleaseManifestInputs(t *testing.T) {
+	chdir(t, repoRoot(t))
+
+	digests, err := contractDigests()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	seen := make(map[string]string, len(digests))
+	for _, digest := range digests {
+		seen[digest.Path] = digest.SHA256
+	}
+	for _, path := range []string{
+		"contracts/manifest.schema.json",
+		"release/manifest/template.json",
+	} {
+		if seen[path] == "" {
+			t.Fatalf("contractDigests() omitted %s: %#v", path, digests)
+		}
+	}
+}
+
 func TestVerifyManifestRejectsExpectedVersionMismatch(t *testing.T) {
 	t.Setenv("CHECK_STATUS", "passed")
 	chdir(t, repoRoot(t))
