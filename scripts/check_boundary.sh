@@ -44,14 +44,20 @@ SEARCH_DIRS=(pkg internal contracts examples)
 
 echo "checking forbidden implicit config discovery..."
 
+# Explicit config loading is allowed: callers may pass a path to LoadEnvFile,
+# NewEnvFileSource, LoadYAMLFile, etc. The boundary this script enforces is
+# implicit discovery/defaulting in production code, such as opening ".env" or
+# production.yaml directly from library code.
 FORBIDDEN_DISCOVERY_PATTERNS=(
-  '(^|[^[:alnum:]_./-])\.env([^[:alnum:]_./-]|$)'
-  '(^|[^[:alnum:]_./-])production\.yaml([^[:alnum:]_./-]|$)'
-  '/home/k8s/secrets/env'
+  '(^|[^[:alnum:]_])((os\.)?(Open|ReadFile|Stat|Lstat)|filepath\.Abs|filepath\.Join)[[:space:]]*\([^)]*["'\'']\.env["'\'']'
+  '(^|[^[:alnum:]_])((os\.)?(Open|ReadFile|Stat|Lstat)|filepath\.Abs|filepath\.Join)[[:space:]]*\([^)]*["'\'']production\.yaml["'\'']'
+  '(^|[^[:alnum:]_])((os\.)?(Open|ReadFile|Stat|Lstat)|filepath\.Abs|filepath\.Join)[[:space:]]*\([^)]*["'\'']/home/k8s/secrets/env'
 )
 
 for pattern in "${FORBIDDEN_DISCOVERY_PATTERNS[@]}"; do
-  if grep -R --line-number --extended-regexp "$pattern" "${SEARCH_DIRS[@]}" --exclude-dir=.git; then
+  if grep -R --line-number --extended-regexp "$pattern" "${SEARCH_DIRS[@]}" \
+    --exclude='*_test.go' \
+    --exclude-dir=.git; then
     echo "ERROR: forbidden implicit config discovery pattern found: $pattern"
     exit 1
   fi

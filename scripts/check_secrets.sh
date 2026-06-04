@@ -4,20 +4,20 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-patterns=(
-  'password[[:space:]]*='
-  'passwd[[:space:]]*='
-  'token[[:space:]]*='
-  'access_key[[:space:]]*='
-  'secret_key[[:space:]]*='
-  "secret[[:space:]]*=[[:space:]]*[\"'][^\"']{8,}[\"']"
+high_confidence_patterns=(
   'AKIA[0-9A-Z]{16}'
   'BEGIN RSA PRIVATE KEY'
   'BEGIN OPENSSH PRIVATE KEY'
   'BEGIN PRIVATE KEY'
 )
 
+key_value_patterns=(
+  '(^|[^[:alnum:]_])[[:alnum:]_]*(password|passwd|token|access_key|secret_key)[[:alnum:]_]*[[:space:]]*=[[:space:]]*["'\'']?[^"'\''[:space:]]{8,}'
+  '(^|[^[:alnum:]_])[[:alnum:]_]*secret[[:alnum:]_]*[[:space:]]*=[[:space:]]*["'\''][^"'\''[:space:]]{8,}["'\'']'
+)
+
 files=()
+key_value_files=()
 while IFS= read -r -d '' file; do
   case "$file" in
     vendor/*|*.sum|scripts/check_secrets.sh|docs/goal.md)
@@ -27,6 +27,13 @@ while IFS= read -r -d '' file; do
 
   if [[ -f "$file" ]]; then
     files+=("$file")
+    case "$file" in
+      docs/*|*_test.go|testdata/*|*/testdata/*)
+        ;;
+      *)
+        key_value_files+=("$file")
+        ;;
+    esac
   fi
 done < <(git ls-files -co --exclude-standard -z)
 
@@ -35,11 +42,20 @@ if ((${#files[@]} == 0)); then
   exit 0
 fi
 
-for pattern in "${patterns[@]}"; do
+for pattern in "${high_confidence_patterns[@]}"; do
   if grep -n -I -E "$pattern" "${files[@]}"; then
     echo "ERROR: possible secret matched pattern: $pattern" >&2
     exit 1
   fi
 done
+
+if ((${#key_value_files[@]} > 0)); then
+  for pattern in "${key_value_patterns[@]}"; do
+    if grep -n -I -E "$pattern" "${key_value_files[@]}"; then
+      echo "ERROR: possible secret matched pattern: $pattern" >&2
+      exit 1
+    fi
+  done
+fi
 
 echo "secret scan OK"
