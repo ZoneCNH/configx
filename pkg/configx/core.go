@@ -19,6 +19,7 @@ import (
 const redactionMarker = "***"
 
 type SecretString = foundationx.SecretString
+type Sanitizer = foundationx.Sanitizer
 
 func NewSecretString(value string) SecretString { return foundationx.NewSecretString(value) }
 
@@ -88,6 +89,8 @@ func LoadJSONFile(ctx context.Context, path string) (LoadResult, error) {
 func LoadMap(ctx context.Context, name string, values map[string]string) (LoadResult, error) {
 	return NewLoader().AddSource(NewMapSource(name, values)).Load(ctx)
 }
+
+func Sanitize(result LoadResult) SanitizedResult { return result.Sanitize() }
 
 func (r LoadResult) Sanitize() SanitizedResult {
 	values := make(map[string]SanitizedValue, len(r.Values))
@@ -506,6 +509,18 @@ func flattenMap(raw map[string]any, source string) Map {
 
 type Validator interface{ Validate() error }
 
+func DecodeMap(values Map, target any) error {
+	return Decode(LoadResult{Values: values}, target)
+}
+
+func Validate(target any) error {
+	validator, ok := target.(Validator)
+	if !ok {
+		return nil
+	}
+	return sanitizeTargetError(target, validator.Validate())
+}
+
 func Decode(result LoadResult, target any) error {
 	const op = "configx.Decode"
 	if target == nil {
@@ -522,10 +537,8 @@ func Decode(result LoadResult, target any) error {
 	if err := decodeStruct(result, rv, ""); err != nil {
 		return err
 	}
-	if validator, ok := target.(Validator); ok {
-		if err := validator.Validate(); err != nil {
-			return validationError(op, "validation failed", sanitizeResultError(result, err))
-		}
+	if err := Validate(target); err != nil {
+		return validationError(op, "validation failed", sanitizeResultError(result, err))
 	}
 	return nil
 }
@@ -685,6 +698,9 @@ func findValue(result LoadResult, key string) (string, string, bool) {
 }
 
 func setField(field reflect.Value, raw string) error {
+	if field.Kind() == reflect.Slice {
+		return setSliceField(field, raw)
+	}
 	if field.CanAddr() {
 		if u, ok := field.Addr().Interface().(encoding.TextUnmarshaler); ok {
 			if err := u.UnmarshalText([]byte(raw)); err != nil {
@@ -742,9 +758,36 @@ func setField(field reflect.Value, raw string) error {
 	return nil
 }
 
+func setSliceField(field reflect.Value, raw string) error {
+	if field.Type().Elem().Kind() != reflect.String {
+		return errors.New("unsupported field type " + field.Type().String())
+	}
+	if raw == "" {
+		field.Set(reflect.MakeSlice(field.Type(), 0, 0))
+		return nil
+	}
+	parts := strings.Split(raw, ",")
+	values := reflect.MakeSlice(field.Type(), len(parts), len(parts))
+	for i, part := range parts {
+		values.Index(i).SetString(strings.TrimSpace(part))
+	}
+	field.Set(values)
+	return nil
+}
+
 func IsSecretKey(key string) bool {
-	k := strings.ToLower(key)
-	return strings.Contains(k, "secret") || strings.Contains(k, "password") || strings.Contains(k, "passwd") || strings.Contains(k, "token") || strings.Contains(k, "access_key") || strings.Contains(k, "secret_key")
+	k := strings.ToLower(strings.TrimSpace(key))
+	normalized := strings.NewReplacer("-", "_", ".", "_").Replace(k)
+	compact := strings.ReplaceAll(normalized, "_", "")
+	return strings.Contains(normalized, "secret") ||
+		strings.Contains(normalized, "password") ||
+		strings.Contains(normalized, "passwd") ||
+		strings.Contains(normalized, "token") ||
+		strings.Contains(normalized, "api_key") ||
+		strings.Contains(compact, "apikey") ||
+		strings.Contains(normalized, "access_key") ||
+		strings.Contains(normalized, "secret_key") ||
+		strings.Contains(normalized, "private_key")
 }
 
 func sanitizeResultError(result LoadResult, err error) error {
@@ -759,6 +802,70 @@ func sanitizeResultError(result LoadResult, err error) error {
 		message = strings.ReplaceAll(message, value.Value, redactionMarker)
 	}
 	return errors.New(message)
+}
+
+func sanitizeTargetError(target any, err error) error {
+	if err == nil {
+		return nil
+	}
+	message := sanitizeMessage(err.Error())
+	for _, secret := range collectTargetSecrets(reflect.ValueOf(target), nil) {
+		message = strings.ReplaceAll(message, secret, redactionMarker)
+	}
+	if message == err.Error() {
+		return err
+	}
+	return errors.New(message)
+}
+
+func collectTargetSecrets(value reflect.Value, seen map[uintptr]struct{}) []string {
+	if !value.IsValid() {
+		return nil
+	}
+	if seen == nil {
+		seen = make(map[uintptr]struct{})
+	}
+	if value.Kind() == reflect.Pointer {
+		if value.IsNil() {
+			return nil
+		}
+		ptr := value.Pointer()
+		if _, ok := seen[ptr]; ok {
+			return nil
+		}
+		seen[ptr] = struct{}{}
+		value = value.Elem()
+	}
+	if value.Type() == reflect.TypeOf(SecretString("")) {
+		secret := value.Interface().(SecretString).Reveal()
+		if secret != "" {
+			return []string{secret}
+		}
+		return nil
+	}
+	if value.Kind() != reflect.Struct {
+		return nil
+	}
+	var secrets []string
+	for i := 0; i < value.NumField(); i++ {
+		field := value.Field(i)
+		if !field.CanInterface() {
+			continue
+		}
+		sf := value.Type().Field(i)
+		if parseConfigTag(sf).secret || sf.Tag.Get("secret") == "true" || field.Type() == reflect.TypeOf(SecretString("")) {
+			if field.Type() == reflect.TypeOf(SecretString("")) {
+				secret := field.Interface().(SecretString).Reveal()
+				if secret != "" {
+					secrets = append(secrets, secret)
+				}
+			} else if field.Kind() == reflect.String && field.String() != "" {
+				secrets = append(secrets, field.String())
+			}
+		}
+		secrets = append(secrets, collectTargetSecrets(field, seen)...)
+	}
+	return secrets
 }
 
 func sanitizeError(err error) error {
