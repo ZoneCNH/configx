@@ -186,6 +186,7 @@ func TestReleaseManifestTemplateCoversVerificationContracts(t *testing.T) {
 	}
 	var template struct {
 		Checks    map[string]string `json:"checks"`
+		Artifacts []string          `json:"artifacts"`
 		Contracts []struct {
 			Path string `json:"path"`
 		} `json:"contracts"`
@@ -219,6 +220,14 @@ func TestReleaseManifestTemplateCoversVerificationContracts(t *testing.T) {
 		"contracts/metrics.md",
 		"contracts/manifest.schema.json",
 		"release/manifest/template.json",
+	)
+
+	requireFields(t, template.Artifacts,
+		"release/manifest/latest.json",
+		"release/manifest/latest.json.sha256",
+		"release/evidence/gate-report.json",
+		"release/evidence/redaction-report.json",
+		"release/evidence/contract-hashes.json",
 	)
 }
 

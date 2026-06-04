@@ -1,8 +1,11 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -79,6 +82,91 @@ func TestVerifyManifestRejectsExpectedVersionMismatch(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), `version mismatch: got "v1.2.3", want "v9.9.9"`) {
 		t.Fatalf("verifyManifest() error = %v, want version mismatch", err)
+	}
+}
+
+func TestReleaseArtifactPathsIncludeRequiredEvidence(t *testing.T) {
+	want := []string{
+		"release/manifest/latest.json",
+		"release/manifest/latest.json.sha256",
+		"release/evidence/gate-report.json",
+		"release/evidence/redaction-report.json",
+		"release/evidence/contract-hashes.json",
+	}
+
+	if got := releaseArtifactPaths(defaultManifestPath); !reflect.DeepEqual(got, want) {
+		t.Fatalf("releaseArtifactPaths() = %#v, want %#v", got, want)
+	}
+}
+
+func TestBuildEvidenceReportsMirrorManifest(t *testing.T) {
+	checks := make(map[string]string, len(checkNames))
+	for _, name := range checkNames {
+		checks[name] = evidenceStatusPassed
+	}
+	manifest := Manifest{
+		Module:       "github.com/ZoneCNH/configx",
+		Version:      "v0.1.2",
+		Commit:       "abc123",
+		TreeState:    "clean",
+		SourceDigest: "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+		GeneratedAt:  "2026-06-04T00:00:00Z",
+		Checks:       checks,
+		Contracts: []FileDigest{
+			{Path: "contracts/config.schema.json", SHA256: "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+		},
+		Artifacts: releaseArtifactPaths(defaultManifestPath),
+	}
+
+	gate := buildGateReport(manifest)
+	if gate.Status != evidenceStatusPassed {
+		t.Fatalf("gate status = %q, want passed", gate.Status)
+	}
+	if gate.Module != manifest.Module || gate.Version != manifest.Version || gate.Commit != manifest.Commit {
+		t.Fatalf("gate identity = %s/%s/%s, want manifest identity", gate.Module, gate.Version, gate.Commit)
+	}
+	if len(gate.Commands) != 5 {
+		t.Fatalf("gate commands = %d, want 5", len(gate.Commands))
+	}
+	if len(gate.Downstream) != 2 {
+		t.Fatalf("gate downstream = %d, want 2", len(gate.Downstream))
+	}
+	if !reflect.DeepEqual(gate.Artifacts, manifest.Artifacts) {
+		t.Fatalf("gate artifacts = %#v, want %#v", gate.Artifacts, manifest.Artifacts)
+	}
+
+	redaction := buildRedactionReport(manifest)
+	if redaction.Status != evidenceStatusPassed {
+		t.Fatalf("redaction status = %q, want passed", redaction.Status)
+	}
+	if len(redaction.Coverage) < 5 {
+		t.Fatalf("redaction coverage = %d, want at least 5", len(redaction.Coverage))
+	}
+
+	contractHashes := buildContractHashesReport(manifest)
+	if !reflect.DeepEqual(contractHashes.Contracts, manifest.Contracts) {
+		t.Fatalf("contract hashes = %#v, want %#v", contractHashes.Contracts, manifest.Contracts)
+	}
+	if contractHashes.SourceDigest != manifest.SourceDigest {
+		t.Fatalf("contract source_digest = %q, want %q", contractHashes.SourceDigest, manifest.SourceDigest)
+	}
+}
+
+func TestManifestSHA256LineMatchesDigest(t *testing.T) {
+	data := []byte("release evidence\n")
+	sum := sha256.Sum256(data)
+	wantDigest := hex.EncodeToString(sum[:])
+
+	got := manifestSHA256Line("release/manifest/latest.json", data)
+	fields := strings.Fields(got)
+	if len(fields) != 2 {
+		t.Fatalf("sha256 line fields = %#v, want digest and path", fields)
+	}
+	if fields[0] != wantDigest {
+		t.Fatalf("sha256 digest = %q, want %q", fields[0], wantDigest)
+	}
+	if fields[1] != "release/manifest/latest.json" {
+		t.Fatalf("sha256 path = %q, want release/manifest/latest.json", fields[1])
 	}
 }
 

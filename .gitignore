@@ -26,6 +26,8 @@ go.work.sum
 
 # Generated release evidence
 release/manifest/latest.json
+release/manifest/latest.json.sha256
+release/evidence/*.json
 
 # Local OMX/team runtime state
 .omx/

@@ -17,21 +17,35 @@ fi
 
 go run ./internal/tools/releasemanifest "${args[@]}"
 
-artifact=release/manifest/latest.json
-for forbidden in \
-  '/home/k8s/secrets/env' \
-  '.env' \
-  'production.yaml' \
-  'production.yml' \
-  'config.local.yaml' \
-  'config.local.yml'; do
-  if grep -Fq "$forbidden" "$artifact"; then
-    echo "ERROR: release evidence contains forbidden config discovery literal: $forbidden" >&2
+artifacts=(
+  release/manifest/latest.json
+  release/manifest/latest.json.sha256
+  release/evidence/gate-report.json
+  release/evidence/redaction-report.json
+  release/evidence/contract-hashes.json
+)
+
+for artifact in "${artifacts[@]}"; do
+  if [[ ! -s "$artifact" ]]; then
+    echo "ERROR: release evidence artifact is missing or empty: $artifact" >&2
+    exit 1
+  fi
+
+  for forbidden in \
+    '/home/k8s/secrets/env' \
+    '.env' \
+    'production.yaml' \
+    'production.yml' \
+    'config.local.yaml' \
+    'config.local.yml'; do
+    if grep -Fq "$forbidden" "$artifact"; then
+      echo "ERROR: release evidence contains forbidden config discovery literal in $artifact: $forbidden" >&2
+      exit 1
+    fi
+  done
+
+  if grep -Eiq '(password|passwd|token|access_key|secret_key)[[:space:]]*[:=][[:space:]]*["'"'']?[^"'"'',}[:space:]]{8,}' "$artifact"; then
+    echo "ERROR: release evidence contains possible raw secret material in $artifact" >&2
     exit 1
   fi
 done
-
-if grep -Eiq '(password|passwd|token|access_key|secret_key)[[:space:]]*[:=][[:space:]]*["'"'']?[^"'"'',}[:space:]]{8,}' "$artifact"; then
-  echo "ERROR: release evidence contains possible raw secret material" >&2
-  exit 1
-fi

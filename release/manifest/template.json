@@ -63,7 +63,11 @@
     "govulncheck": "{{GOVULNCHECK_VERSION}}"
   },
   "artifacts": [
-    "release/manifest/latest.json"
+    "release/manifest/latest.json",
+    "release/manifest/latest.json.sha256",
+    "release/evidence/gate-report.json",
+    "release/evidence/redaction-report.json",
+    "release/evidence/contract-hashes.json"
   ],
   "notes": {
     "breaking_changes": "none",

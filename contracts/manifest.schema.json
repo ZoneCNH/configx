@@ -80,7 +80,16 @@
     },
     "artifacts": {
       "type": "array",
-      "items": { "type": "string", "minLength": 1 }
+      "minItems": 5,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 },
+      "allOf": [
+        { "contains": { "const": "release/manifest/latest.json" } },
+        { "contains": { "const": "release/manifest/latest.json.sha256" } },
+        { "contains": { "const": "release/evidence/gate-report.json" } },
+        { "contains": { "const": "release/evidence/redaction-report.json" } },
+        { "contains": { "const": "release/evidence/contract-hashes.json" } }
+      ]
     },
     "notes": {
       "type": "object",
