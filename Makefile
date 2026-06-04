@@ -1,21 +1,31 @@
+CACHE_DIR ?= $(CURDIR)/.omx/cache
+export GOCACHE ?= $(CACHE_DIR)/go-build
+export GOMODCACHE ?= $(CACHE_DIR)/gomod
+export GOLANGCI_LINT_CACHE ?= $(CACHE_DIR)/golangci-lint
+export XDG_CACHE_HOME ?= $(CACHE_DIR)/xdg
+
+.PHONY: local-cache-dirs
+local-cache-dirs:
+	mkdir -p "$(GOCACHE)" "$(GOMODCACHE)" "$(GOLANGCI_LINT_CACHE)" "$(XDG_CACHE_HOME)"
+
 .PHONY: fmt
 fmt:
 	go fmt ./...
 
 .PHONY: vet
-vet:
+vet: local-cache-dirs
 	go vet ./...
 
 .PHONY: test
-test:
+test: local-cache-dirs
 	go test ./...
 
 .PHONY: race
-race:
+race: local-cache-dirs
 	go test -race ./...
 
 .PHONY: lint
-lint:
+lint: local-cache-dirs
 	@if command -v golangci-lint >/dev/null 2>&1; then \
 		golangci-lint run ./...; \
 	else \
@@ -28,7 +38,7 @@ integration:
 	./scripts/run_integration.sh
 
 .PHONY: security
-security:
+security: local-cache-dirs
 	@if command -v govulncheck >/dev/null 2>&1; then \
 		govulncheck ./...; \
 	else \
@@ -46,7 +56,7 @@ contracts:
 	./scripts/check_contracts.sh
 
 .PHONY: property
-property:
+property: local-cache-dirs
 	go test ./... -run 'Test.*Property|Test.*Invariant'
 
 .PHONY: fuzz-smoke
@@ -54,7 +64,7 @@ fuzz-smoke:
 	./scripts/run_fuzz_smoke.sh
 
 .PHONY: golden
-golden:
+golden: local-cache-dirs
 	go test ./... -run 'Test.*Golden|Test.*Snapshot'
 
 .PHONY: evidence

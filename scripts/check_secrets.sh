@@ -17,14 +17,26 @@ patterns=(
   'BEGIN PRIVATE KEY'
 )
 
+files=()
+while IFS= read -r -d '' file; do
+  case "$file" in
+    vendor/*|*.sum|scripts/check_secrets.sh|docs/goal.md)
+      continue
+      ;;
+  esac
+
+  if [[ -f "$file" ]]; then
+    files+=("$file")
+  fi
+done < <(git ls-files -co --exclude-standard -z)
+
+if ((${#files[@]} == 0)); then
+  echo "secret scan OK"
+  exit 0
+fi
+
 for pattern in "${patterns[@]}"; do
-  if grep -R -n -E "$pattern" . \
-    --exclude-dir=.git \
-    --exclude-dir=.omx \
-    --exclude-dir=vendor \
-    --exclude='*.sum' \
-    --exclude='check_secrets.sh' \
-    --exclude='goal.md'; then
+  if grep -n -I -E "$pattern" "${files[@]}"; then
     echo "ERROR: possible secret matched pattern: $pattern" >&2
     exit 1
   fi
