@@ -22,15 +22,14 @@ const (
 )
 
 func mergeValue(values Map, key string, value Value, strategy MergeStrategy) error {
-	prev, exists := values[key]
+	_, exists := values[key]
 	if !exists {
 		values[key] = value
 		return nil
 	}
 	switch strategy {
 	case LastWins:
-		prev.Overridden = true
-		values[key] = prev
+		value.Overridden = true
 		values[key] = value
 	case FirstWins:
 		return nil

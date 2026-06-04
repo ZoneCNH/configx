@@ -1062,6 +1062,9 @@ func TestMergeValueLastWinsOverwrites(t *testing.T) {
 	if m["k"].Value != "second" {
 		t.Fatalf("expected second value, got %q", m["k"].Value)
 	}
+	if !m["k"].Overridden {
+		t.Fatal("expected winning value to be marked overridden")
+	}
 }
 
 func TestMergeValueNewKeyNoConflict(t *testing.T) {
