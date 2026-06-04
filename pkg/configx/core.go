@@ -112,9 +112,17 @@ type sourceOptions struct{ name string }
 
 func WithSourceName(name string) SourceOption { return func(o *sourceOptions) { o.name = name } }
 
-type MergeStrategy int
+type MergeStrategy string
 
-const LastWins MergeStrategy = iota
+const (
+	MergeLastWins        MergeStrategy = "last_wins"
+	MergeFirstWins       MergeStrategy = "first_wins"
+	MergeErrorOnConflict MergeStrategy = "error_on_conflict"
+
+	// LastWins preserves the original public constant name while the explicit
+	// Merge* names document all supported strategies.
+	LastWins = MergeLastWins
+)
 
 type Loader struct {
 	sources []Source
@@ -128,7 +136,7 @@ type loaderOptions struct {
 }
 
 func defaultLoaderOptions() loaderOptions {
-	return loaderOptions{mergeStrategy: LastWins, failFast: true}
+	return loaderOptions{mergeStrategy: MergeLastWins, failFast: true}
 }
 func WithMergeStrategy(strategy MergeStrategy) LoaderOption {
 	return func(o *loaderOptions) { o.mergeStrategy = strategy }
@@ -161,6 +169,9 @@ func (l *Loader) Load(ctx context.Context) (LoadResult, error) {
 	if l == nil {
 		return LoadResult{}, validationError(op, "loader is nil", nil)
 	}
+	if !isSupportedMergeStrategy(l.options.mergeStrategy) {
+		return LoadResult{}, validationError(op, "unsupported merge strategy: "+string(l.options.mergeStrategy), nil)
+	}
 	loadedAt := time.Now().UTC()
 	result := LoadResult{Values: Map{}, LoadedAt: loadedAt}
 	for _, source := range l.sources {
@@ -191,10 +202,6 @@ func (l *Loader) Load(ctx context.Context) (LoadResult, error) {
 		}
 		report.Loaded = true
 		for key, value := range values {
-			if prev, ok := result.Values[key]; ok {
-				prev.Overridden = true
-				result.Values[key] = prev
-			}
 			if value.Key == "" {
 				value.Key = key
 			}
@@ -204,12 +211,83 @@ func (l *Loader) Load(ctx context.Context) (LoadResult, error) {
 			if value.LoadedAt.IsZero() {
 				value.LoadedAt = report.LoadedAt
 			}
-			result.Values[key] = value
+			if err := mergeValue(result.Values, key, value, l.options.mergeStrategy); err != nil {
+				report.Loaded = false
+				report.Error = sanitizeMessage(err.Error())
+				if l.options.failFast {
+					result.Sources = append(result.Sources, report)
+					return result, err
+				}
+				continue
+			}
 			report.ValueKeys = append(report.ValueKeys, key)
 		}
 		result.Sources = append(result.Sources, report)
 	}
 	return result, nil
+}
+
+func Merge(strategy MergeStrategy, maps ...Map) (Map, error) {
+	if !isSupportedMergeStrategy(strategy) {
+		return nil, validationError("configx.Merge", "unsupported merge strategy: "+string(strategy), nil)
+	}
+	merged := Map{}
+	for _, values := range maps {
+		for key, value := range values {
+			if value.Key == "" {
+				value.Key = key
+			}
+			if err := mergeValue(merged, key, value, strategy); err != nil {
+				return merged, err
+			}
+		}
+	}
+	return merged, nil
+}
+
+func mergeValue(values Map, key string, next Value, strategy MergeStrategy) error {
+	const op = "configx.Merge"
+	if values == nil {
+		return validationError(op, "target map is required", nil)
+	}
+	if key == "" {
+		return validationError(op, "key is required", nil)
+	}
+	current, exists := values[key]
+	if !exists {
+		values[key] = next
+		return nil
+	}
+	switch normalizeMergeStrategy(strategy) {
+	case MergeLastWins:
+		next.Overridden = true
+		values[key] = next
+		return nil
+	case MergeFirstWins:
+		current.Overridden = true
+		values[key] = current
+		return nil
+	case MergeErrorOnConflict:
+		return WrapError(ErrorKindConflict, op, "config key conflict: "+key, false, nil)
+	default:
+		return validationError(op, "unsupported merge strategy: "+string(strategy), nil)
+	}
+}
+
+func normalizeMergeStrategy(strategy MergeStrategy) MergeStrategy {
+	if strategy == "" {
+		return MergeLastWins
+	}
+	return strategy
+}
+
+func isSupportedMergeStrategy(strategy MergeStrategy) bool {
+	switch normalizeMergeStrategy(strategy) {
+	case MergeLastWins, MergeFirstWins, MergeErrorOnConflict:
+		return true
+	default:
+		return false
+	}
 }
 
 type EnvSource struct {

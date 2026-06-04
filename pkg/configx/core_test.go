@@ -39,6 +39,71 @@ func TestLoaderMergesSourcesLastWinsAndSanitizesSecrets(t *testing.T) {
 	if result.Sanitize().Values["API_TOKEN"].Value != redactionMarker {
 		t.Fatalf("secret leaked in sanitize")
 	}
+	if !result.Values["PORT"].Overridden || result.Values["PORT"].Source != "override" {
+		t.Fatalf("PORT override trace not recorded: %#v", result.Values["PORT"])
+	}
+}
+
+func TestMergeStrategies(t *testing.T) {
+	defaults := Map{
+		"PORT":      {Key: "PORT", Value: "1000", Source: "defaults"},
+		"API_TOKEN": {Key: "API_TOKEN", Value: "one", Secret: true, Source: "defaults"},
+	}
+	overrides := Map{
+		"PORT":      {Key: "PORT", Value: "2000", Source: "overrides"},
+		"API_TOKEN": {Key: "API_TOKEN", Value: "two", Secret: true, Source: "overrides"},
+	}
+
+	last, err := Merge(MergeLastWins, defaults, overrides)
+	if err != nil {
+		t.Fatalf("last wins: %v", err)
+	}
+	if got := last["PORT"]; got.Value != "2000" || got.Source != "overrides" || !got.Overridden {
+		t.Fatalf("last wins PORT=%#v", got)
+	}
+	if !last["API_TOKEN"].Secret {
+		t.Fatalf("last wins lost secret flag: %#v", last["API_TOKEN"])
+	}
+
+	first, err := Merge(MergeFirstWins, defaults, overrides)
+	if err != nil {
+		t.Fatalf("first wins: %v", err)
+	}
+	if got := first["PORT"]; got.Value != "1000" || got.Source != "defaults" || !got.Overridden {
+		t.Fatalf("first wins PORT=%#v", got)
+	}
+
+	conflict, err := Merge(MergeErrorOnConflict, defaults, overrides)
+	if err == nil || !IsKind(err, ErrorKindConflict) {
+		t.Fatalf("expected conflict error, got %v", err)
+	}
+	if got := conflict["PORT"]; got.Value != "1000" || got.Source != "defaults" {
+		t.Fatalf("conflict should preserve first value before error: %#v", got)
+	}
+}
+
+func TestLoaderHonorsMergeStrategy(t *testing.T) {
+	result, err := NewLoader(WithMergeStrategy(MergeFirstWins)).
+		AddSource(NewMapSource("defaults", map[string]string{"PORT": "1000"})).
+		AddSource(NewMapSource("overrides", map[string]string{"PORT": "2000"})).
+		Load(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := result.Get("PORT"); got != "1000" {
+		t.Fatalf("PORT=%q", got)
+	}
+	if result.Values["PORT"].Source != "defaults" || !result.Values["PORT"].Overridden {
+		t.Fatalf("unexpected first-wins trace: %#v", result.Values["PORT"])
+	}
+
+	_, err = NewLoader(WithMergeStrategy(MergeErrorOnConflict)).
+		AddSource(NewMapSource("defaults", map[string]string{"PORT": "1000"})).
+		AddSource(NewMapSource("overrides", map[string]string{"PORT": "2000"})).
+		Load(context.Background())
+	if err == nil || !IsKind(err, ErrorKindConflict) {
+		t.Fatalf("expected loader conflict error, got %v", err)
+	}
 }
 
 func TestEnvSourceReadsOnlyExplicitKeys(t *testing.T) {
