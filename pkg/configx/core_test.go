@@ -297,3 +297,90 @@ func TestDecodeSecretTagMarksNonObviousKeyForSanitize(t *testing.T) {
 		t.Fatalf("secret-tagged source leaked through sanitize: %q", got)
 	}
 }
+
+func TestDecodeMapAndStringSlice(t *testing.T) {
+	type sliceConfig struct {
+		Hosts []string `config:"HOSTS"`
+	}
+	values := Map{
+		"HOSTS": {Key: "HOSTS", Value: "alpha, beta,gamma", Source: "test"},
+	}
+	var cfg sliceConfig
+	if err := DecodeMap(values, &cfg); err != nil {
+		t.Fatal(err)
+	}
+	want := []string{"alpha", "beta", "gamma"}
+	if len(cfg.Hosts) != len(want) {
+		t.Fatalf("hosts=%#v", cfg.Hosts)
+	}
+	for i := range want {
+		if cfg.Hosts[i] != want[i] {
+			t.Fatalf("hosts=%#v", cfg.Hosts)
+		}
+	}
+}
+
+func TestValidateCallsValidatorNoopAndPreservesError(t *testing.T) {
+	if err := Validate(&struct{ Name string }{Name: "plain"}); err != nil {
+		t.Fatalf("non-validator validate: %v", err)
+	}
+
+	sentinel := errors.New("bad config")
+	cfg := validatorStub{err: sentinel}
+	if err := Validate(&cfg); err != sentinel {
+		t.Fatalf("expected sentinel error identity, got %v", err)
+	}
+}
+
+type validatorStub struct{ err error }
+
+func (v *validatorStub) Validate() error { return v.err }
+
+func TestValidateRedactsSecretStringReveal(t *testing.T) {
+	cfg := validateSecretConfig{Password: NewSecretString("validate-secret")}
+	err := Validate(&cfg)
+	if err == nil {
+		t.Fatal("expected validation error")
+	}
+	if strings.Contains(err.Error(), "validate-secret") {
+		t.Fatalf("secret leaked in validation error: %v", err)
+	}
+	if !strings.Contains(err.Error(), redactionMarker) {
+		t.Fatalf("expected redaction marker, got %v", err)
+	}
+}
+
+type validateSecretConfig struct {
+	Password SecretString `config:"PASSWORD" secret:"true"`
+}
+
+func (v *validateSecretConfig) Validate() error {
+	return errors.New("rejected " + v.Password.Reveal())
+}
+
+func TestIsSecretKeyPolicy(t *testing.T) {
+	for _, key := range []string{"db.password", "api_key", "APIKey", "private-key", "access.key", "secret_key", "token"} {
+		if !IsSecretKey(key) {
+			t.Fatalf("expected %q to be secret", key)
+		}
+	}
+	for _, key := range []string{"KEY", "monkey", "keyboard", "public_key"} {
+		if IsSecretKey(key) {
+			t.Fatalf("expected %q to be public", key)
+		}
+	}
+}
+
+func TestTopLevelSanitize(t *testing.T) {
+	result := LoadResult{Values: Map{
+		"API_TOKEN": {Key: "API_TOKEN", Value: "hidden", Secret: true, Source: "test"},
+		"NAME":      {Key: "NAME", Value: "visible", Source: "test"},
+	}}
+	sanitized := Sanitize(result)
+	if sanitized.Values["API_TOKEN"].Value != redactionMarker {
+		t.Fatalf("secret leaked: %#v", sanitized.Values["API_TOKEN"])
+	}
+	if sanitized.Values["NAME"].Value != "visible" {
+		t.Fatalf("public value redacted: %#v", sanitized.Values["NAME"])
+	}
+}
