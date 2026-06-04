@@ -15,6 +15,16 @@ func sanitizeError(err error) error {
 	if err == nil {
 		return nil
 	}
+	var target *Error
+	if errors.As(err, &target) {
+		return &Error{
+			Kind:      target.Kind,
+			Op:        target.Op,
+			Message:   sanitizeMessage(target.Message),
+			Cause:     sanitizeError(target.Cause),
+			Retryable: target.Retryable,
+		}
+	}
 	return errors.New(sanitizeMessage(err.Error()))
 }
 

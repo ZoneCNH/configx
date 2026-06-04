@@ -944,6 +944,52 @@ func TestSanitizeMessageRedactsSecretKeyValue(t *testing.T) {
 	}
 }
 
+func TestSanitizeErrorPreservesConfigxErrorSemantics(t *testing.T) {
+	cause := errors.New("driver failed password=supersecret")
+	err := WrapError(ErrorKindTimeout, "configx.Source.Load", "token=mytoken failed", true, cause)
+
+	sanitized := sanitizeError(err)
+	var got *Error
+	if !errors.As(sanitized, &got) {
+		t.Fatalf("expected sanitized *Error, got %T", sanitized)
+	}
+	if got.Kind != ErrorKindTimeout || got.Op != "configx.Source.Load" || !got.Retryable {
+		t.Fatalf("metadata not preserved: %#v", got)
+	}
+	if !IsKind(sanitized, ErrorKindTimeout) {
+		t.Fatalf("kind lookup failed for sanitized error: %v", sanitized)
+	}
+	if got.Cause == nil {
+		t.Fatal("expected sanitized cause to be preserved")
+	}
+	if strings.Contains(got.Error(), "mytoken") || strings.Contains(got.Cause.Error(), "supersecret") {
+		t.Fatalf("secret leaked in sanitized error: %q cause=%q", got.Error(), got.Cause.Error())
+	}
+}
+
+func TestSanitizeErrorPreservesNestedConfigxErrorCauseSemantics(t *testing.T) {
+	inner := WrapError(ErrorKindAuth, "inner", "password=innersecret", true, errors.New("token=causesecret"))
+	outer := WrapError(ErrorKindConfig, "outer", "secret_key=outersecret", false, inner)
+
+	sanitized := sanitizeError(outer)
+	var outerGot *Error
+	if !errors.As(sanitized, &outerGot) {
+		t.Fatalf("expected outer *Error, got %T", sanitized)
+	}
+	var innerGot *Error
+	if !errors.As(outerGot.Cause, &innerGot) {
+		t.Fatalf("expected nested *Error cause, got %T", outerGot.Cause)
+	}
+	if innerGot.Kind != ErrorKindAuth || innerGot.Op != "inner" || !innerGot.Retryable {
+		t.Fatalf("nested metadata not preserved: %#v", innerGot)
+	}
+	for _, leaked := range []string{"outersecret", "innersecret", "causesecret"} {
+		if strings.Contains(sanitized.Error(), leaked) || strings.Contains(innerGot.Error(), leaked) || strings.Contains(innerGot.Cause.Error(), leaked) {
+			t.Fatalf("secret %q leaked: outer=%q inner=%q cause=%q", leaked, sanitized.Error(), innerGot.Error(), innerGot.Cause.Error())
+		}
+	}
+}
+
 func TestSanitizeMessageHandlesTokenKey(t *testing.T) {
 	msg := "token=mytoken123"
 	got := sanitizeMessage(msg)
