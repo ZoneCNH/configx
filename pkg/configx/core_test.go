@@ -274,3 +274,25 @@ func TestDecodeValidationHookDoesNotExposeSecretValue(t *testing.T) {
 		t.Fatalf("expected sanitized validation wrapper, got %v", err)
 	}
 }
+
+func TestDecodeSecretTagMarksNonObviousKeyForSanitize(t *testing.T) {
+	type taggedSecretConfig struct {
+		Credential SecretString `config:"credential,secret"`
+	}
+	result := LoadResult{Values: Map{
+		"credential": {Key: "credential", Value: "opaque-value", Source: "test"},
+	}}
+	var cfg taggedSecretConfig
+	if err := Decode(result, &cfg); err != nil {
+		t.Fatal(err)
+	}
+	if cfg.Credential.Reveal() != "opaque-value" {
+		t.Fatal("secret-tagged value was not decoded")
+	}
+	if !result.Values["credential"].Secret {
+		t.Fatal("secret tag did not mark source value secret")
+	}
+	if got := result.Sanitize().Values["credential"].Value; got != redactionMarker {
+		t.Fatalf("secret-tagged source leaked through sanitize: %q", got)
+	}
+}
