@@ -41,6 +41,38 @@ func TestLoaderMergesSourcesLastWinsAndSanitizesSecrets(t *testing.T) {
 	}
 }
 
+func TestLoaderMergeStrategyFirstWins(t *testing.T) {
+	result, err := NewLoader(WithMergeStrategy(MergeFirstWins)).
+		AddSource(NewMapSource("defaults", map[string]string{"PORT": "1000", "HOST": "localhost"})).
+		AddSource(NewMapSource("override", map[string]string{"PORT": "2000"})).
+		Load(context.Background())
+	if err != nil {
+		t.Fatalf("load: %v", err)
+	}
+	if got, _ := result.Get("PORT"); got != "1000" {
+		t.Fatalf("PORT=%q", got)
+	}
+	if got, _ := result.Get("HOST"); got != "localhost" {
+		t.Fatalf("HOST=%q", got)
+	}
+}
+
+func TestLoaderMergeStrategyErrorOnConflict(t *testing.T) {
+	result, err := NewLoader(WithMergeStrategy(MergeErrorOnConflict)).
+		AddSource(NewMapSource("defaults", map[string]string{"PORT": "1000"})).
+		AddSource(NewMapSource("override", map[string]string{"PORT": "2000"})).
+		Load(context.Background())
+	if err == nil || !IsKind(err, ErrorKindConflict) {
+		t.Fatalf("expected conflict error, got %v", err)
+	}
+	if strings.Contains(err.Error(), "1000") || strings.Contains(err.Error(), "2000") {
+		t.Fatalf("conflict error leaked values: %v", err)
+	}
+	if got, _ := result.Get("PORT"); got != "1000" {
+		t.Fatalf("conflict should preserve existing value, got %q", got)
+	}
+}
+
 func TestEnvSourceReadsOnlyExplicitKeys(t *testing.T) {
 	t.Setenv("CFG_NAME", "configx")
 	t.Setenv("CFG_OTHER", "ignored")

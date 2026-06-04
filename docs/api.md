@@ -6,7 +6,8 @@
 
 - `NewLoader(opts ...LoaderOption) *Loader` 创建隔离的 loader。loader 不持有进程级全局状态，也不会在加入 source 前执行发现。
 - `(*Loader).AddSource(Source) *Loader` 追加调用方提供的 source。
-- `(*Loader).Load(context.Context) (LoadResult, error)` 按顺序加载每个 source。后面的值覆盖前面的值；先前的 `Value` 会标记为 `Overridden`。
+- `(*Loader).Load(context.Context) (LoadResult, error)` 按顺序加载每个 source。默认 merge strategy 是 `MergeLastWins`（兼容别名：`LastWins`）：后面的值覆盖前面的值。
+- `WithMergeStrategy(MergeFirstWins)` 保留第一个 source 的值并忽略后续冲突 key；`WithMergeStrategy(MergeErrorOnConflict)` 在重复 key 上返回 `ErrorKindConflict`，错误文本只包含 key，不包含配置值。
 - `WithFailFast(bool)` 控制 source error 是否立即停止加载。
 
 ## 来源类型

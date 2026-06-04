@@ -114,7 +114,15 @@ func WithSourceName(name string) SourceOption { return func(o *sourceOptions) { 
 
 type MergeStrategy int
 
-const LastWins MergeStrategy = iota
+const (
+	LastWins MergeStrategy = iota
+	FirstWins
+	ErrorOnConflict
+
+	MergeLastWins        = LastWins
+	MergeFirstWins       = FirstWins
+	MergeErrorOnConflict = ErrorOnConflict
+)
 
 type Loader struct {
 	sources []Source
@@ -191,10 +199,6 @@ func (l *Loader) Load(ctx context.Context) (LoadResult, error) {
 		}
 		report.Loaded = true
 		for key, value := range values {
-			if prev, ok := result.Values[key]; ok {
-				prev.Overridden = true
-				result.Values[key] = prev
-			}
 			if value.Key == "" {
 				value.Key = key
 			}
@@ -204,12 +208,37 @@ func (l *Loader) Load(ctx context.Context) (LoadResult, error) {
 			if value.LoadedAt.IsZero() {
 				value.LoadedAt = report.LoadedAt
 			}
-			result.Values[key] = value
 			report.ValueKeys = append(report.ValueKeys, key)
+			if err := mergeValue(result.Values, key, value, l.options.mergeStrategy); err != nil {
+				report.Error = err.Error()
+				result.Sources = append(result.Sources, report)
+				return result, WrapError(ErrorKindConflict, op, report.Error, false, err)
+			}
 		}
 		result.Sources = append(result.Sources, report)
 	}
 	return result, nil
+}
+
+func mergeValue(values Map, key string, value Value, strategy MergeStrategy) error {
+	prev, exists := values[key]
+	if !exists {
+		values[key] = value
+		return nil
+	}
+	switch strategy {
+	case LastWins:
+		prev.Overridden = true
+		values[key] = prev
+		values[key] = value
+	case FirstWins:
+		return nil
+	case ErrorOnConflict:
+		return fmt.Errorf("merge conflict for key %q", key)
+	default:
+		return fmt.Errorf("unknown merge strategy %d", strategy)
+	}
+	return nil
 }
 
 type EnvSource struct {

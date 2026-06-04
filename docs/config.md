@@ -6,7 +6,7 @@
 
 1. 不做隐式配置发现：库永不搜索 `.env`、`config.json`、`config.toml`、`config.yaml`、home directory、working directory 或其他默认路径。
 2. 不使用全局状态：loaders 是通过 `NewLoader` 创建的普通值。
-3. Source 顺序确定：后面的 sources 覆盖前面的 sources。
+3. Source 顺序确定：默认使用 `MergeLastWins`，后面的 sources 覆盖前面的 sources；调用方可显式选择 `MergeFirstWins` 或 `MergeErrorOnConflict`。
 4. 每次 load 都在 `SourceReport` 中记录 source 证据，且不暴露 secret 值。
 
 ## 环境变量
