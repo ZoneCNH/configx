@@ -3,10 +3,12 @@ package configx
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"reflect"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 )
@@ -130,6 +132,42 @@ func TestWithFailFastOption(t *testing.T) {
 	loader2 := NewLoader(WithFailFast(true))
 	if !loader2.options.failFast {
 		t.Fatal("expected failFast=true")
+	}
+}
+
+func TestLoaderConcurrentAddSourceAndLoad(t *testing.T) {
+	loader := NewLoader().AddSource(NewMapSource("base", map[string]string{"base": "value"}))
+	ctx := context.Background()
+
+	var wg sync.WaitGroup
+	errs := make(chan error, 50)
+
+	for i := 0; i < 25; i++ {
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			loader.AddSource(NewMapSource(
+				fmt.Sprintf("dynamic-%d", i),
+				map[string]string{fmt.Sprintf("key-%d", i): fmt.Sprintf("value-%d", i)},
+			))
+		}(i)
+	}
+
+	for i := 0; i < 25; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			_, err := loader.Load(ctx)
+			errs <- err
+		}()
+	}
+
+	wg.Wait()
+	close(errs)
+	for err := range errs {
+		if err != nil {
+			t.Fatalf("load: %v", err)
+		}
 	}
 }
 

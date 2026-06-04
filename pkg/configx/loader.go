@@ -2,11 +2,13 @@ package configx
 
 import (
 	"context"
+	"sync"
 	"time"
 )
 
 // Loader orchestrates loading configuration from multiple sources.
 type Loader struct {
+	mu      sync.RWMutex
 	sources []Source
 	options loaderOptions
 }
@@ -47,6 +49,8 @@ func (l *Loader) AddSource(source Source) *Loader {
 	if l == nil {
 		return l
 	}
+	l.mu.Lock()
+	defer l.mu.Unlock()
 	l.sources = append(l.sources, source)
 	return l
 }
@@ -60,9 +64,14 @@ func (l *Loader) Load(ctx context.Context) (LoadResult, error) {
 	if l == nil {
 		return LoadResult{}, validationError(op, "loader is nil", nil)
 	}
+	l.mu.RLock()
+	sources := append([]Source(nil), l.sources...)
+	options := l.options
+	l.mu.RUnlock()
+
 	loadedAt := time.Now().UTC()
 	result := LoadResult{Values: Map{}, LoadedAt: loadedAt}
-	for _, source := range l.sources {
+	for _, source := range sources {
 		if err := ctx.Err(); err != nil {
 			return result, contextError(op, err)
 		}
@@ -70,7 +79,7 @@ func (l *Loader) Load(ctx context.Context) (LoadResult, error) {
 		if source == nil {
 			report.Error = "source is nil"
 			result.Sources = append(result.Sources, report)
-			if l.options.failFast {
+			if options.failFast {
 				return result, validationError(op, report.Error, nil)
 			}
 			continue
@@ -83,7 +92,7 @@ func (l *Loader) Load(ctx context.Context) (LoadResult, error) {
 		if err != nil {
 			report.Error = sanitizeMessage(err.Error())
 			result.Sources = append(result.Sources, report)
-			if l.options.failFast {
+			if options.failFast {
 				return result, WrapError(ErrorKindConfig, op, report.Error, false, sanitizeError(err))
 			}
 			continue
@@ -100,7 +109,7 @@ func (l *Loader) Load(ctx context.Context) (LoadResult, error) {
 				value.LoadedAt = report.LoadedAt
 			}
 			report.ValueKeys = append(report.ValueKeys, key)
-			if err := mergeValue(result.Values, key, value, l.options.mergeStrategy); err != nil {
+			if err := mergeValue(result.Values, key, value, options.mergeStrategy); err != nil {
 				report.Error = err.Error()
 				result.Sources = append(result.Sources, report)
 				return result, WrapError(ErrorKindConflict, op, report.Error, false, err)
