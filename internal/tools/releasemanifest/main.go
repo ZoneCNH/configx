@@ -174,7 +174,7 @@ func buildManifest() (Manifest, error) {
 }
 
 func verifyManifest(path string, requirePassed bool, requireClean bool, expectVersion string) error {
-	data, err := os.ReadFile(path)
+	data, err := os.ReadFile(filepath.Clean(path))
 	if err != nil {
 		return err
 	}
@@ -248,7 +248,7 @@ func verifyManifest(path string, requirePassed bool, requireClean bool, expectVe
 }
 
 func writeManifest(path string, manifest Manifest) error {
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(path), 0o750); err != nil {
 		return err
 	}
 	var buf bytes.Buffer
@@ -257,7 +257,7 @@ func writeManifest(path string, manifest Manifest) error {
 	if err := encoder.Encode(manifest); err != nil {
 		return err
 	}
-	return os.WriteFile(path, buf.Bytes(), 0o644)
+	return os.WriteFile(path, buf.Bytes(), 0o600)
 }
 
 func buildChecks() map[string]string {
@@ -300,7 +300,7 @@ func sourceDigest() (string, int, error) {
 
 	digest := sha256.New()
 	for _, path := range files {
-		data, err := os.ReadFile(path)
+		data, err := os.ReadFile(filepath.Clean(path))
 		if err != nil {
 			return "", 0, err
 		}
@@ -327,7 +327,7 @@ func contractDigests() ([]FileDigest, error) {
 }
 
 func fileDigest(path string) (FileDigest, error) {
-	data, err := os.ReadFile(path)
+	data, err := os.ReadFile(filepath.Clean(path))
 	if err != nil {
 		return FileDigest{}, err
 	}

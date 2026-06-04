@@ -3,6 +3,7 @@ package contracts
 import (
 	"encoding/json"
 	"os"
+	"path/filepath"
 	"reflect"
 	"sort"
 	"strings"
@@ -156,7 +157,7 @@ func requireNoAdditionalProperties(t *testing.T, schema objectSchema) {
 
 func readSchema(t *testing.T, path string) objectSchema {
 	t.Helper()
-	content, err := os.ReadFile(path)
+	content, err := os.ReadFile(filepath.Clean(path))
 	if err != nil {
 		t.Fatalf("read %s: %v", path, err)
 	}

@@ -40,7 +40,7 @@ func TestValidateChecksRequiresPassedStatuses(t *testing.T) {
 
 func TestFileDigestRecordsPathAndSHA256(t *testing.T) {
 	path := t.TempDir() + "/contract.json"
-	if err := os.WriteFile(path, []byte("abc"), 0o644); err != nil {
+	if err := os.WriteFile(path, []byte("abc"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 

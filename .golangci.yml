@@ -8,6 +8,11 @@ linters:
     - govet
     - ineffassign
     - staticcheck
+    - errcheck
+    - gosec
+    - unconvert
+    - unparam
+    - misspell
 
 issues:
   max-issues-per-linter: 0
