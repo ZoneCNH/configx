@@ -519,6 +519,19 @@ func Decode(result LoadResult, target any) error {
 	if rv.Kind() != reflect.Struct {
 		return validationError(op, "target must point to a struct", nil)
 	}
+	if err := decodeStruct(result, rv, ""); err != nil {
+		return err
+	}
+	if validator, ok := target.(Validator); ok {
+		if err := validator.Validate(); err != nil {
+			return validationError(op, "validation failed", sanitizeResultError(result, err))
+		}
+	}
+	return nil
+}
+
+func decodeStruct(result LoadResult, rv reflect.Value, prefix string) error {
+	const op = "configx.Decode"
 	rt := rv.Type()
 	for i := 0; i < rv.NumField(); i++ {
 		field := rv.Field(i)
@@ -530,7 +543,21 @@ func Decode(result LoadResult, target any) error {
 		if tag.skip {
 			continue
 		}
-		raw, ok := findValue(result, tag.key)
+		key := joinConfigKey(prefix, tag.key)
+		if isStructField(field) {
+			nested := field
+			if field.Kind() == reflect.Pointer {
+				if field.IsNil() {
+					field.Set(reflect.New(field.Type().Elem()))
+				}
+				nested = field.Elem()
+			}
+			if err := decodeStruct(result, nested, key); err != nil {
+				return err
+			}
+			continue
+		}
+		raw, ok := findValue(result, key)
 		if !ok {
 			if tag.defaultValue != "" {
 				raw = tag.defaultValue
@@ -539,26 +566,43 @@ func Decode(result LoadResult, target any) error {
 		}
 		if !ok {
 			if tag.required {
-				return validationError(op, "required config missing: "+tag.key, nil)
+				return validationError(op, "required config missing: "+key, nil)
 			}
 			continue
 		}
 		if err := setField(field, raw); err != nil {
-			return validationError(op, "decode "+tag.key+" failed", sanitizeError(err))
-		}
-	}
-	if validator, ok := target.(Validator); ok {
-		if err := validator.Validate(); err != nil {
-			return validationError(op, "validation failed", err)
+			return validationError(op, "decode "+key+" failed", sanitizeResultError(result, err))
 		}
 	}
 	return nil
+}
+
+func joinConfigKey(prefix, key string) string {
+	if prefix == "" {
+		return key
+	}
+	if key == "" {
+		return prefix
+	}
+	return prefix + "." + key
+}
+
+func isStructField(field reflect.Value) bool {
+	t := field.Type()
+	if field.Kind() == reflect.Pointer {
+		t = field.Type().Elem()
+	}
+	if t.Kind() != reflect.Struct {
+		return false
+	}
+	return t != reflect.TypeOf(time.Duration(0)) && t != reflect.TypeOf(SecretString("")) && !reflect.PointerTo(t).Implements(reflect.TypeOf((*encoding.TextUnmarshaler)(nil)).Elem())
 }
 
 type configTag struct {
 	key          string
 	defaultValue string
 	required     bool
+	secret       bool
 	skip         bool
 }
 
@@ -692,6 +736,20 @@ func setField(field reflect.Value, raw string) error {
 func IsSecretKey(key string) bool {
 	k := strings.ToLower(key)
 	return strings.Contains(k, "secret") || strings.Contains(k, "password") || strings.Contains(k, "passwd") || strings.Contains(k, "token") || strings.Contains(k, "access_key") || strings.Contains(k, "secret_key")
+}
+
+func sanitizeResultError(result LoadResult, err error) error {
+	if err == nil {
+		return nil
+	}
+	message := sanitizeMessage(err.Error())
+	for key, value := range result.Values {
+		if value.Value == "" || (!value.Secret && !IsSecretKey(key)) {
+			continue
+		}
+		message = strings.ReplaceAll(message, value.Value, redactionMarker)
+	}
+	return errors.New(message)
 }
 
 func sanitizeError(err error) error {
