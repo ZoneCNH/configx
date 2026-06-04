@@ -16,3 +16,22 @@ if [[ -n "${VERSION:-}" ]]; then
 fi
 
 go run ./internal/tools/releasemanifest "${args[@]}"
+
+artifact=release/manifest/latest.json
+for forbidden in \
+  '/home/k8s/secrets/env' \
+  '.env' \
+  'production.yaml' \
+  'production.yml' \
+  'config.local.yaml' \
+  'config.local.yml'; do
+  if grep -Fq "$forbidden" "$artifact"; then
+    echo "ERROR: release evidence contains forbidden config discovery literal: $forbidden" >&2
+    exit 1
+  fi
+done
+
+if grep -Eiq '(password|passwd|token|access_key|secret_key)[[:space:]]*[:=][[:space:]]*["'"'']?[^"'"'',}[:space:]]{8,}' "$artifact"; then
+  echo "ERROR: release evidence contains possible raw secret material" >&2
+  exit 1
+fi

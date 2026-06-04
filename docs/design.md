@@ -10,7 +10,7 @@
 
 ## 配置
 
-调用方必须显式传入配置。生成的库不得隐式读取 `x.go` 生产密钥路径。`Validate` 使用稳定校验错误表达缺失字段和负数 timeout，`Sanitize` 只返回可安全记录的脱敏视图。`contracts/config.schema.json` 使用外部字段 `timeout_ms`，并通过契约回归测试锁定到 `Config.Timeout`。
+调用方必须显式传入配置。生成的库不得隐式读取 `x.go` 生产密钥路径、`.env`、`production.yaml`、`config.local.yaml` 或 `/home/k8s/secrets/env/*`。`Validate` 使用稳定校验错误表达缺失字段和负数 timeout，`Sanitize`、`LoadResult.Sanitize()` 与 `SecretString` 只返回可安全记录的脱敏视图。`contracts/config.schema.json` 使用外部字段 `timeout_ms`，并通过契约回归测试锁定到 `Config.Timeout`。
 
 ## 错误模型
 
@@ -27,6 +27,10 @@
 ## 测试
 
 模板要求为配置校验、脱敏、客户端生命周期、健康检查和内部辅助代码提供单元测试与竞态测试。
+
+## 安全与边界
+
+`docs/security.md` 和 `docs/redaction.md` 是安全边界的读者入口。边界脚本拒绝 `x.go`、隐式配置发现、L2 provider/cloud/driver dependencies 和业务术语漂移；发布证据只能包含脱敏 manifest 与 gate 状态。
 
 ## 发布
 

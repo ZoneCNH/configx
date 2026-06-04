@@ -15,7 +15,8 @@
 - `contracts/error.schema.json`、`contracts/health.schema.json` 和 `contracts/metrics.md` 与公共常量保持一致。
 - `scripts/render_template.sh` 可以生成非自引用的 ZoneCNH 基础库形态并通过 `GOWORK=off go test ./...`。
 - 模块不得依赖 `github.com/bytechainx/x.go` 或 `github.com/ZoneCNH/x.go`。
-- 模块不得隐式读取生产密钥。
+- 模块不得隐式读取生产密钥或自动发现 `.env`、`production.yaml`、`config.local.yaml`、`/home/k8s/secrets/env/*`。
+- `docs/current-state.md` 必须记录当前 MVA surface、边界约束和最新可复现证据命令。
 
 ## 非目标
 

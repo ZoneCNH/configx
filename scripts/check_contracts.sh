@@ -5,7 +5,22 @@ required=(
   README.md
   docs/goal.md
   docs/contracts.md
+  docs/current-state.md
   docs/examples.md
+  docs/redaction.md
+  docs/security.md
+  docs/sources.md
+  docs/envfile.md
+  docs/merge.md
+  docs/decode.md
+  docs/validation.md
+  docs/secrets.md
+  docs/sanitize.md
+  docs/xgo-integration.md
+  docs/adr/ADR-20260601-001-explicit-source-loading.md
+  docs/adr/ADR-20260601-002-no-global-config.md
+  docs/adr/ADR-20260601-003-secret-handling.md
+  docs/adr/ADR-20260601-004-yaml-toml-scope.md
   docs/release.md
   docs/review.md
   contracts/config.schema.json

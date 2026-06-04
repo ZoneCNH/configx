@@ -7,7 +7,7 @@
 - `docs/goal.md` 保留为权威来源；模板应用必须更新支撑文档与 harness checks，但不得覆盖它。
 - `internal/foundationx` 是窄兼容模块，不是 `/tmp/configx-foundationx` 的完整副本；参见 `docs/foundationx-compatibility.md`。
 - `configx` 保持显式加载语义：只有在调用方传入具体 source/path 时，才读取 env files、JSON files 与 `/home/k8s/secrets/env/*` paths。
-- 边界校验必须在发布证据被接受前拒绝生成的 `x.go` files、`x.go` dependencies 与 infrastructure driver dependencies。
+- 边界校验必须在发布证据被接受前拒绝生成的 `x.go` files、`x.go` dependencies、implicit config discovery、cloud/KMS/Vault/Consul/Etcd/Nacos 与 infrastructure driver dependencies。
 - 密钥证据只能使用脱敏 values；不得在 validation logs、examples、manifests 或 documentation output 中调用 `Reveal()`。
 
 ## 边界检查
@@ -37,3 +37,4 @@
 - [ ] README 指向 `docs/goal.md` 作为权威来源。
 - [ ] Examples 只展示 explicit 调用方持有的 paths。
 - [ ] Release documentation 要求 evidence 与 secret scanning。
+- [ ] `docs/current-state.md`、`docs/security.md` 与 `docs/redaction.md` 覆盖当前边界和脱敏证据。

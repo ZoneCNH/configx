@@ -36,7 +36,7 @@
 
 ## 脱敏
 
-`LoadResult.Sanitize()` 返回 `SanitizedResult`，其中 secret 值会脱敏为 `***`。名称包含 secret、password、passwd、token、access_key 或 secret_key 的 key 会被视为 secret；`NewSecretMapSource` 可以显式标记额外 key。`SecretString.String()` 与文本 marshaling 均返回脱敏输出。
+详见 `docs/redaction.md`。`LoadResult.Sanitize()` 返回 `SanitizedResult`，其中 secret 值会脱敏为 `***`。名称包含 secret、password、passwd、token、access_key 或 secret_key 的 key 会被视为 secret；`NewSecretMapSource` 可以显式标记额外 key。`SecretString.String()` 与文本 marshaling 均返回脱敏输出。
 
 ## 基础契约
 
@@ -48,4 +48,4 @@
 - `Metrics` hooks 和名称由 `contracts/metrics.md` 锁定。
 - `Version` 和 `ModuleName` 用于发布证据。
 
-包不得导入 `x.go`，不得创建全局配置状态，也不得添加 driver dependencies。
+包不得导入 `x.go`，不得创建全局配置状态，也不得添加 driver dependencies。安全边界详见 `docs/security.md`。
