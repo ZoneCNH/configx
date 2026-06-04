@@ -2,13 +2,32 @@
 
 ## 未发布
 
+暂无。
+
+## v0.1.2 - 2026-06-04
+
 ### 新增
 
 - 新增显式 TOML 与 YAML/YML 文件 source，并提供 `LoadTOMLFile`、`LoadYAMLFile` convenience loaders。
+- 新增发布证据 sidecar artifacts：`release/manifest/latest.json.sha256`、`release/evidence/gate-report.json`、`release/evidence/redaction-report.json` 和 `release/evidence/contract-hashes.json`。
 
 ### 治理
 
 - 扩展配置 source 文档与回归测试，锁定嵌套 key 展开、last-wins merge、source report path/value keys 和 secret redaction 行为。
+- `make release-check` 与 `make release-final-check` 生成并校验完整发布证据集合，覆盖 manifest checksum、gate 状态、下游采纳证据、redaction 报告和 contract hashes。
+- 补齐复盘 patch artifacts：`.agent/patch_prompt.md`、`.agent/patch_harness.md` 和 `.agent/patch_rule.md`。
+
+### 安全
+
+- 发布证据校验禁止原始 secret-shaped values、隐式发现路径和未脱敏敏感样例进入 manifest、sidecar reports 或 release evidence。
+
+### 验证
+
+- 已运行 `GOWORK=off go test ./...`。
+- 已运行 `GOWORK=off make ci`。
+- 已运行 `GOWORK=off make ci-extended`。
+- 已运行 `XLIB_CONTEXT=release_verify GOWORK=off make release-check`。
+- 已运行 `XLIB_CONTEXT=release_verify GOWORK=off make release-final-check`。
 
 ## v0.1.1 - 2026-06-01
 
