@@ -79,3 +79,5 @@ GOWORK=off ./scripts/check_secrets.sh
 - [foundationx 兼容性](docs/foundationx-compatibility.md)：本地兼容边界与升级规则。
 - [测试](docs/testing.md)：unit、contract、race、boundary、security 和发布证据 Gate。
 - [发布](docs/release.md)：release manifest 与证据要求。
+- [ADR](docs/adr/)：架构决策记录（merge 策略、无全局状态、显式加载）。
+- [项目分析](docs/project-analysis-20260604.md)：结构分析与评分报告（v0.1.3 满分）。

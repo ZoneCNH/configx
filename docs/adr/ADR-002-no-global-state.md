@@ -55,7 +55,7 @@ defer client.Close()
 
 ## 证据
 
-- `pkg/configx/core.go`：`NewLoader()` 返回新实例，无包级变量。
+- `pkg/configx/loader.go`：`NewLoader()` 返回新实例，无包级变量。
 - `pkg/configx/client.go`：`Client` 通过 `NewClient()` 显式创建，`mu sync.RWMutex` 保护状态。
 - `pkg/configx/options.go`：函数式选项模式，无全局默认值。
 - `pkg/configx/core_test.go`：每个测试独立创建 Loader，无共享状态。

@@ -1,5 +1,32 @@
 # 变更日志
 
+## v0.1.3 - 2026-06-04
+
+### 重构
+
+- 拆分 `core.go`（667 行）为 8 个职责文件：`loader.go`、`source.go`、`source_env.go`、`source_file.go`、`source_map.go`、`merge.go`、`secret.go`、`result.go`。
+- 内联 `internal/sanitize` 和 `internal/validation` 到 `pkg/configx` 作为私有函数（单函数包反模式修复）。
+- 最大文件行数从 667 降至 265。
+
+### 新增
+
+- 测试覆盖率从 75.8% 提升至 97.1%，新增 93 个测试函数。
+- 新增 6 个 benchmark 测试（`core_bench_test.go`）。
+- 新增 3 个 ADR 文档：last-wins merge strategy、no global state、explicit config loading。
+- 新增 `examples/error-handling/` 示例，覆盖 5 种错误处理模式。
+- 增强 golangci-lint 配置，新增 5 个 linter：`errcheck`、`gosec`、`unconvert`、`unparam`、`misspell`。
+
+### 修复
+
+- 修复 7 个 gosec 告警（文件路径清理 `filepath.Clean`、目录权限 0o750、文件权限 0o600）。
+
+### 验证
+
+- `GOWORK=off go test ./...` 全部通过（8 packages）。
+- `GOWORK=off go vet ./...` 零告警。
+- `golangci-lint run ./...` 零告警。
+- 覆盖率 97.1%。
+
 ## 未发布
 
 ### 新增

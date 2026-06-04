@@ -5,7 +5,7 @@
 本仓库实现 `github.com/ZoneCNH/configx`，并按基础库模板组织：
 
 - `pkg/configx/` 是对外公共 API。
-- `internal/` 放私有实现；`internal/foundationx/` 是本仓库用于兼容 `github.com/ZoneCNH/foundationx` 的本地 replace 模块。
+- `internal/` 放私有实现；`internal/foundationx/` 是本仓库用于兼容 `github.com/ZoneCNH/foundationx` 的本地 replace 模块。`internal/sanitize` 和 `internal/validation` 已内联到 `pkg/configx` 作为私有函数。
 - `contracts/` 放契约 schema、契约测试和指标契约。
 - `examples/` 放可编译示例。
 - `testkit/` 放测试辅助包。

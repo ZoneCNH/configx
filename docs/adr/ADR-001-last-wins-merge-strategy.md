@@ -53,5 +53,5 @@ loader := NewLoader().
 
 ## 证据
 
-- `pkg/configx/core.go`：`mergeValue()` 函数实现，`MergeStrategy` 类型定义。
+- `pkg/configx/merge.go`：`mergeValue()` 函数实现，`MergeStrategy` 类型定义。
 - `pkg/configx/core_test.go`：`TestLoaderMergesSourcesLastWinsAndSanitizesSecrets`、`TestLoaderMergeStrategyFirstWins`、`TestLoaderMergeStrategyErrorOnConflict`。

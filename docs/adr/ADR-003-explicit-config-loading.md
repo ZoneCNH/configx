@@ -56,8 +56,8 @@ loader := NewLoader().
 
 ## 证据
 
-- `pkg/configx/core.go`：`EnvSource` 的 `keys` 字段要求显式传入 key 列表；`NewAllEnvSource` 需要显式选择。
-- `pkg/configx/core.go`：`EnvFileSource`、`JSONFileSource` 要求显式路径参数。
+- `pkg/configx/source_env.go`：`EnvSource` 的 `keys` 字段要求显式传入 key 列表；`NewAllEnvSource` 需要显式选择。
+- `pkg/configx/source_file.go`：`EnvFileSource`、`JSONFileSource` 要求显式路径参数。
 - `pkg/configx/structured_sources.go`：`TOMLFileSource`、`YAMLFileSource` 同样要求显式路径。
 - `pkg/configx/core_test.go`：`TestNoImplicitConfigDiscovery` 验证空 Loader 不产生任何值。
 - `pkg/configx/core_test.go`：`TestEnvSourceReadsOnlyExplicitKeys` 验证只读取声明的 key。
