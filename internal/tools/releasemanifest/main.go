@@ -51,6 +51,8 @@ var contractFiles = []string{
 	"contracts/health.schema.json",
 	"contracts/version.schema.json",
 	"contracts/metrics.md",
+	"contracts/manifest.schema.json",
+	"release/manifest/template.json",
 }
 
 type Manifest struct {

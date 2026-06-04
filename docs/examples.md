@@ -8,18 +8,19 @@
 ctx := context.Background()
 loader := configx.NewLoader()
 
-result, err := loader.AddSource(configx.NewEnvFileSource("/home/k8s/secrets/env/postgres.env")).Load(ctx)
+envFile := filepath.Join(configDir, "service.env")
+result, err := loader.AddSource(configx.NewEnvFileSource(envFile)).Load(ctx)
 if err != nil {
     return err
 }
 
-var cfg PostgresConfig
+var cfg ServiceConfig
 if err := configx.Decode(result, &cfg); err != nil {
     return err
 }
 ```
 
-路径由应用提供。`configx` 不得自行搜索该目录。
+路径由应用或部署层显式提供。`configx` 不得自行搜索默认目录、secret 目录或生产路径。
 
 ## Map 覆盖优先级
 

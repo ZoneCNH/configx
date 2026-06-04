@@ -132,6 +132,96 @@ func TestVersionContractMatchesFoundationXVersionInfo(t *testing.T) {
 	requireSchemaFieldMapsToStructField(t, schema, versionType, "go_version", "GoVersion", "string")
 }
 
+func TestManifestSchemaPinsReleaseEvidenceShape(t *testing.T) {
+	schema := readSchema(t, "manifest.schema.json")
+	requireNoAdditionalProperties(t, schema)
+	requireFields(t, schema.Required,
+		"module",
+		"version",
+		"commit",
+		"tree_sha",
+		"source_digest",
+		"tracked_file_count",
+		"go_version",
+		"generated_at",
+		"generated_by",
+		"tree_state",
+		"checks",
+		"contracts",
+		"dependencies",
+		"tools",
+		"artifacts",
+		"notes",
+	)
+
+	for field, schemaType := range map[string]string{
+		"version":            "string",
+		"commit":             "string",
+		"tree_sha":           "string",
+		"source_digest":      "string",
+		"tracked_file_count": "integer",
+		"go_version":         "string",
+		"generated_at":       "string",
+		"generated_by":       "string",
+		"checks":             "object",
+		"contracts":          "array",
+		"dependencies":       "array",
+		"tools":              "object",
+		"artifacts":          "array",
+		"notes":              "object",
+	} {
+		if got := schema.Properties[field].Type; got != schemaType {
+			t.Fatalf("manifest schema property %q type = %q, want %q", field, got, schemaType)
+		}
+	}
+	if got := sortedStrings(schema.Properties["tree_state"].Enum...); !reflect.DeepEqual(got, []string{"clean", "dirty"}) {
+		t.Fatalf("manifest tree_state enum = %#v, want clean/dirty", got)
+	}
+}
+
+func TestReleaseManifestTemplateCoversVerificationContracts(t *testing.T) {
+	content, err := os.ReadFile("../release/manifest/template.json")
+	if err != nil {
+		t.Fatalf("read release manifest template: %v", err)
+	}
+	var template struct {
+		Checks    map[string]string `json:"checks"`
+		Contracts []struct {
+			Path string `json:"path"`
+		} `json:"contracts"`
+	}
+	if err := json.Unmarshal(content, &template); err != nil {
+		t.Fatalf("parse release manifest template: %v", err)
+	}
+
+	requireMapKeys(t, template.Checks,
+		"fmt",
+		"vet",
+		"lint",
+		"unit_test",
+		"race_test",
+		"boundary",
+		"secret_scan",
+		"security",
+		"contract",
+		"integration",
+	)
+
+	var contractPaths []string
+	for _, contract := range template.Contracts {
+		contractPaths = append(contractPaths, contract.Path)
+	}
+	requireFields(t, contractPaths,
+		"contracts/config.schema.json",
+		"contracts/error.schema.json",
+		"contracts/health.schema.json",
+		"contracts/version.schema.json",
+		"contracts/metrics.md",
+		"contracts/manifest.schema.json",
+		"release/manifest/template.json",
+	)
+}
+
 func requireSchemaFieldMapsToStructField(t *testing.T, schema objectSchema, structType reflect.Type, schemaField string, structField string, schemaType string) {
 	t.Helper()
 
@@ -176,6 +266,15 @@ func requireFields(t *testing.T, actual []string, expected ...string) {
 	for _, field := range expected {
 		if !fields[field] {
 			t.Fatalf("required fields missing %q from %#v", field, actual)
+		}
+	}
+}
+
+func requireMapKeys[T any](t *testing.T, actual map[string]T, expected ...string) {
+	t.Helper()
+	for _, key := range expected {
+		if _, ok := actual[key]; !ok {
+			t.Fatalf("map keys missing %q from %#v", key, actual)
 		}
 	}
 }

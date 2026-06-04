@@ -22,21 +22,49 @@
     "integration": "{{CHECK_STATUS}}"
   },
   "contracts": [
-    { "path": "contracts/config.schema.json", "sha256": "{{CONFIG_SCHEMA_SHA256}}" },
-    { "path": "contracts/error.schema.json", "sha256": "{{ERROR_SCHEMA_SHA256}}" },
-    { "path": "contracts/health.schema.json", "sha256": "{{HEALTH_SCHEMA_SHA256}}" },
-    { "path": "contracts/version.schema.json", "sha256": "{{VERSION_SCHEMA_SHA256}}" },
-    { "path": "contracts/metrics.md", "sha256": "{{METRICS_SHA256}}" }
+    {
+      "path": "contracts/config.schema.json",
+      "sha256": "{{CONFIG_SCHEMA_SHA256}}"
+    },
+    {
+      "path": "contracts/error.schema.json",
+      "sha256": "{{ERROR_SCHEMA_SHA256}}"
+    },
+    {
+      "path": "contracts/health.schema.json",
+      "sha256": "{{HEALTH_SCHEMA_SHA256}}"
+    },
+    {
+      "path": "contracts/version.schema.json",
+      "sha256": "{{VERSION_SCHEMA_SHA256}}"
+    },
+    {
+      "path": "contracts/metrics.md",
+      "sha256": "{{METRICS_SHA256}}"
+    },
+    {
+      "path": "contracts/manifest.schema.json",
+      "sha256": "{{MANIFEST_SCHEMA_SHA256}}"
+    },
+    {
+      "path": "release/manifest/template.json",
+      "sha256": "{{RELEASE_TEMPLATE_SHA256}}"
+    }
   ],
   "dependencies": [
-    { "path": "github.com/ZoneCNH/configx", "main": true }
+    {
+      "path": "github.com/ZoneCNH/configx",
+      "main": true
+    }
   ],
   "tools": {
     "go": "{{GO_VERSION}}",
     "golangci-lint": "{{GOLANGCI_LINT_VERSION}}",
     "govulncheck": "{{GOVULNCHECK_VERSION}}"
   },
-  "artifacts": ["release/manifest/latest.json"],
+  "artifacts": [
+    "release/manifest/latest.json"
+  ],
   "notes": {
     "breaking_changes": "none",
     "known_risks": []

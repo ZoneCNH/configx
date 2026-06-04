@@ -17,7 +17,7 @@ type appConfig struct {
 func main() {
 	loader := configx.NewLoader().AddSource(configx.NewSecretMapSource("example", map[string]string{
 		"APP_NAME":  "configx",
-		"API_TOKEN": "example-token",
+		"API_TOKEN": "fixture-sensitive-value",
 	}, []string{"API_TOKEN"}))
 
 	result, err := loader.Load(context.Background())

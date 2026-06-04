@@ -2,18 +2,129 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "configx release manifest",
   "type": "object",
-  "required": ["module", "version", "commit", "tree_state", "checks", "contracts", "artifacts"],
+  "required": [
+    "module",
+    "version",
+    "commit",
+    "tree_sha",
+    "source_digest",
+    "tracked_file_count",
+    "go_version",
+    "generated_at",
+    "generated_by",
+    "tree_state",
+    "checks",
+    "contracts",
+    "dependencies",
+    "tools",
+    "artifacts",
+    "notes"
+  ],
   "properties": {
     "module": { "const": "github.com/ZoneCNH/configx" },
-    "version": { "type": "string" },
-    "commit": { "type": "string" },
-    "tree_state": { "enum": ["clean", "dirty"] },
-    "checks": { "type": "object" },
-    "contracts": { "type": "array" },
-    "dependencies": { "type": "array" },
-    "tools": { "type": "object" },
-    "artifacts": { "type": "array" },
-    "notes": { "type": "object" }
+    "version": { "type": "string", "minLength": 1 },
+    "commit": { "type": "string", "minLength": 1 },
+    "tree_sha": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "source_digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "tracked_file_count": { "type": "integer", "minimum": 0 },
+    "go_version": { "type": "string", "minLength": 1 },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "generated_by": { "type": "string", "const": "scripts/generate_manifest.sh" },
+    "tree_state": { "type": "string", "enum": ["clean", "dirty"] },
+    "checks": {
+      "type": "object",
+      "required": [
+        "fmt",
+        "vet",
+        "lint",
+        "unit_test",
+        "race_test",
+        "boundary",
+        "secret_scan",
+        "security",
+        "contract",
+        "integration"
+      ],
+      "properties": {
+        "fmt": { "$ref": "#/$defs/checkStatus" },
+        "vet": { "$ref": "#/$defs/checkStatus" },
+        "lint": { "$ref": "#/$defs/checkStatus" },
+        "unit_test": { "$ref": "#/$defs/checkStatus" },
+        "race_test": { "$ref": "#/$defs/checkStatus" },
+        "boundary": { "$ref": "#/$defs/checkStatus" },
+        "secret_scan": { "$ref": "#/$defs/checkStatus" },
+        "security": { "$ref": "#/$defs/checkStatus" },
+        "contract": { "$ref": "#/$defs/checkStatus" },
+        "integration": { "$ref": "#/$defs/checkStatus" }
+      },
+      "additionalProperties": false
+    },
+    "contracts": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/fileDigest" }
+    },
+    "dependencies": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/moduleDigest" }
+    },
+    "tools": {
+      "type": "object",
+      "required": ["go", "golangci-lint", "govulncheck"],
+      "properties": {
+        "go": { "type": "string", "minLength": 1 },
+        "golangci-lint": { "type": "string", "minLength": 1 },
+        "govulncheck": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "artifacts": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "notes": {
+      "type": "object",
+      "required": ["breaking_changes", "known_risks"],
+      "properties": {
+        "breaking_changes": { "type": "string" },
+        "known_risks": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    }
   },
-  "additionalProperties": true
+  "$defs": {
+    "checkStatus": { "type": "string", "enum": ["unknown", "passed", "failed", "skipped"] },
+    "fileDigest": {
+      "type": "object",
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "sha256": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
+      },
+      "additionalProperties": false
+    },
+    "moduleDigest": {
+      "type": "object",
+      "required": ["path"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "version": { "type": "string" },
+        "main": { "type": "boolean" },
+        "replace": {
+          "type": "object",
+          "required": ["path"],
+          "properties": {
+            "path": { "type": "string", "minLength": 1 },
+            "version": { "type": "string" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
 }
