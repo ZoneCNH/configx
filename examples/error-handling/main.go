@@ -75,13 +75,20 @@ func invalidFormatErr(ctx context.Context) {
 		fmt.Printf("ERROR creating temp file: %v\n", err)
 		return
 	}
-	defer os.Remove(tmpFile.Name())
+	defer func() {
+		if err := os.Remove(tmpFile.Name()); err != nil {
+			fmt.Printf("ERROR removing temp file: %v\n", err)
+		}
+	}()
 
 	if _, err := tmpFile.WriteString(`{"key": "value", broken`); err != nil {
 		fmt.Printf("ERROR writing temp file: %v\n", err)
 		return
 	}
-	tmpFile.Close()
+	if err := tmpFile.Close(); err != nil {
+		fmt.Printf("ERROR closing temp file: %v\n", err)
+		return
+	}
 
 	_, err = configx.LoadJSONFile(ctx, tmpFile.Name())
 	if err == nil {
@@ -100,10 +107,23 @@ func invalidFormatErr(ctx context.Context) {
 // mergePriority demonstrates that later sources override earlier ones (LastWins).
 func mergePriority(ctx context.Context) {
 	envKey := "APP_PORT"
-	original := os.Getenv(envKey)
-	defer os.Setenv(envKey, original)
+	original, hadOriginal := os.LookupEnv(envKey)
+	defer func() {
+		var err error
+		if hadOriginal {
+			err = os.Setenv(envKey, original)
+		} else {
+			err = os.Unsetenv(envKey)
+		}
+		if err != nil {
+			fmt.Printf("ERROR restoring env var: %v\n", err)
+		}
+	}()
 
-	os.Setenv(envKey, "9090")
+	if err := os.Setenv(envKey, "9090"); err != nil {
+		fmt.Printf("ERROR setting env var: %v\n", err)
+		return
+	}
 
 	loader := configx.NewLoader().
 		AddSource(configx.NewMapSource("defaults", map[string]string{

@@ -20,9 +20,9 @@ func BenchmarkLoaderLoad(b *testing.B) {
 		"DB_USER":   "postgres",
 	}
 	override := map[string]string{
-		"APP_PORT": "9090",
+		"APP_PORT":  "9090",
 		"APP_DEBUG": "true",
-		"DB_HOST":  "remote-host",
+		"DB_HOST":   "remote-host",
 	}
 	keys := []string{"APP_NAME", "APP_PORT", "APP_HOST", "APP_DEBUG", "DB_HOST", "DB_PORT", "DB_NAME", "DB_USER"}
 
@@ -42,26 +42,26 @@ func BenchmarkLoaderLoad(b *testing.B) {
 
 func BenchmarkDecode(b *testing.B) {
 	type benchConfig struct {
-		Name    string `config:"APP_NAME" required:"true"`
-		Port    int    `config:"APP_PORT" default:"8080"`
-		Debug   bool   `config:"APP_DEBUG"`
-		Host    string `config:"APP_HOST" default:"localhost"`
-		DBHost  string `config:"DB_HOST"`
-		DBPort  int    `config:"DB_PORT" default:"5432"`
-		DBName  string `config:"DB_NAME"`
-		DBUser  string `config:"DB_USER"`
+		Name   string `config:"APP_NAME" required:"true"`
+		Port   int    `config:"APP_PORT" default:"8080"`
+		Debug  bool   `config:"APP_DEBUG"`
+		Host   string `config:"APP_HOST" default:"localhost"`
+		DBHost string `config:"DB_HOST"`
+		DBPort int    `config:"DB_PORT" default:"5432"`
+		DBName string `config:"DB_NAME"`
+		DBUser string `config:"DB_USER"`
 	}
 
 	result := LoadResult{
 		Values: Map{
-			"APP_NAME": {Key: "APP_NAME", Value: "bench"},
-			"APP_PORT": {Key: "APP_PORT", Value: "9090"},
+			"APP_NAME":  {Key: "APP_NAME", Value: "bench"},
+			"APP_PORT":  {Key: "APP_PORT", Value: "9090"},
 			"APP_DEBUG": {Key: "APP_DEBUG", Value: "true"},
-			"APP_HOST": {Key: "APP_HOST", Value: "remote-host"},
-			"DB_HOST":  {Key: "DB_HOST", Value: "db.example.com"},
-			"DB_PORT":  {Key: "DB_PORT", Value: "5432"},
-			"DB_NAME":  {Key: "DB_NAME", Value: "proddb"},
-			"DB_USER":  {Key: "DB_USER", Value: "admin"},
+			"APP_HOST":  {Key: "APP_HOST", Value: "remote-host"},
+			"DB_HOST":   {Key: "DB_HOST", Value: "db.example.com"},
+			"DB_PORT":   {Key: "DB_PORT", Value: "5432"},
+			"DB_NAME":   {Key: "DB_NAME", Value: "proddb"},
+			"DB_USER":   {Key: "DB_USER", Value: "admin"},
 		},
 	}
 

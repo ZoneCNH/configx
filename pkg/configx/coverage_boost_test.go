@@ -13,11 +13,15 @@ import (
 	"time"
 )
 
+func nilContext() context.Context {
+	return nil
+}
+
 // --- Loader edge cases ---
 
 func TestLoaderLoadRejectsNilContext(t *testing.T) {
 	loader := NewLoader().AddSource(NewMapSource("m", map[string]string{"k": "v"}))
-	_, err := loader.Load(nil)
+	_, err := loader.Load(nilContext())
 	if err == nil {
 		t.Fatal("expected nil context error")
 	}
@@ -175,7 +179,7 @@ func TestLoaderConcurrentAddSourceAndLoad(t *testing.T) {
 
 func TestEnvSourceLoadNilContext(t *testing.T) {
 	src := NewEnvSource("PFX_", []string{"KEY"})
-	_, err := src.Load(nil)
+	_, err := src.Load(nilContext())
 	if err == nil {
 		t.Fatal("expected nil context error")
 	}
@@ -247,7 +251,7 @@ func TestEnvSourceWithSourceNameOverride(t *testing.T) {
 
 func TestMapSourceLoadNilContext(t *testing.T) {
 	src := NewMapSource("m", map[string]string{"k": "v"})
-	_, err := src.Load(nil)
+	_, err := src.Load(nilContext())
 	if err == nil {
 		t.Fatal("expected nil context error")
 	}
@@ -288,7 +292,7 @@ func TestMapSourceSecretKeysMarked(t *testing.T) {
 
 func TestEnvFileSourceLoadNilContext(t *testing.T) {
 	src := NewEnvFileSource("/some/path")
-	_, err := src.Load(nil)
+	_, err := src.Load(nilContext())
 	if err == nil {
 		t.Fatal("expected nil context error")
 	}
@@ -418,7 +422,7 @@ func TestEnvFileSourceWithSourceNameOverride(t *testing.T) {
 
 func TestJSONFileSourceLoadNilContext(t *testing.T) {
 	src := NewJSONFileSource("/some/path")
-	_, err := src.Load(nil)
+	_, err := src.Load(nilContext())
 	if err == nil {
 		t.Fatal("expected nil context error")
 	}
@@ -518,7 +522,7 @@ func TestFlattenMapHandlesDeeplyNested(t *testing.T) {
 
 func TestTOMLFileSourceLoadNilContext(t *testing.T) {
 	src := NewTOMLFileSource("/some/path")
-	_, err := src.Load(nil)
+	_, err := src.Load(nilContext())
 	if err == nil {
 		t.Fatal("expected nil context error")
 	}
@@ -561,7 +565,7 @@ func TestTOMLFileSourceLoadInvalidTOML(t *testing.T) {
 
 func TestYAMLFileSourceLoadNilContext(t *testing.T) {
 	src := NewYAMLFileSource("/some/path")
-	_, err := src.Load(nil)
+	_, err := src.Load(nilContext())
 	if err == nil {
 		t.Fatal("expected nil context error")
 	}
@@ -1214,7 +1218,7 @@ func TestLoadMapConvenience(t *testing.T) {
 // --- Client edge cases ---
 
 func TestNewRejectsNilContext(t *testing.T) {
-	_, err := New(nil, Config{Name: "test"})
+	_, err := New(nilContext(), Config{Name: "test"})
 	if err == nil {
 		t.Fatal("expected nil context error")
 	}
@@ -1228,7 +1232,7 @@ func TestCloseRejectsNilContext(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = client.Close(nil)
+	err = client.Close(nilContext())
 	if err == nil {
 		t.Fatal("expected nil context error")
 	}
