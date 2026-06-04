@@ -245,12 +245,6 @@ func TestDecodeNestedStructAndValidationHookRedactsSecretCause(t *testing.T) {
 	if cfg.Database.Password.String() != redactionMarker {
 		t.Fatalf("secret string leaked: %s", cfg.Database.Password.String())
 	}
-
-	type validatingConfig struct {
-		Password SecretString `config:"password" required:"true" secret:"true"`
-	}
-	funcValidate := validatingConfig{Password: NewSecretString("nested-secret")}
-	_ = funcValidate
 }
 
 type validationRedactionConfig struct {

@@ -557,7 +557,7 @@ func decodeStruct(result LoadResult, rv reflect.Value, prefix string) error {
 			}
 			continue
 		}
-		raw, ok := findValue(result, key)
+		raw, resolvedKey, ok := findValue(result, key)
 		if !ok {
 			if tag.defaultValue != "" {
 				raw = tag.defaultValue
@@ -572,6 +572,11 @@ func decodeStruct(result LoadResult, rv reflect.Value, prefix string) error {
 		}
 		if err := setField(field, raw); err != nil {
 			return validationError(op, "decode "+key+" failed", sanitizeResultError(result, err))
+		}
+		if tag.secret && resolvedKey != "" {
+			value := result.Values[resolvedKey]
+			value.Secret = true
+			result.Values[resolvedKey] = value
 		}
 	}
 	return nil
@@ -654,6 +659,8 @@ func applyTagOptions(tag *configTag, options []string) {
 		switch {
 		case option == "required":
 			tag.required = true
+		case option == "secret":
+			tag.secret = true
 		case strings.HasPrefix(option, "default="):
 			tag.defaultValue = strings.TrimPrefix(option, "default=")
 		}
@@ -664,15 +671,17 @@ func isTagOption(option string) bool {
 	return option == "required" || strings.HasPrefix(option, "default=") || option == "secret"
 }
 
-func findValue(result LoadResult, key string) (string, bool) {
+func findValue(result LoadResult, key string) (string, string, bool) {
 	if raw, ok := result.Get(key); ok {
-		return raw, true
+		return raw, key, true
 	}
 	normalized := strings.ToUpper(strings.ReplaceAll(key, ".", "_"))
 	if normalized != key {
-		return result.Get(normalized)
+		if raw, ok := result.Get(normalized); ok {
+			return raw, normalized, true
+		}
 	}
-	return "", false
+	return "", "", false
 }
 
 func setField(field reflect.Value, raw string) error {
