@@ -21,7 +21,7 @@
 - `GOWORK=off go test -race ./...` - 运行 race 测试。
 - `GOWORK=off go vet ./...` - 运行 Go static checks。
 - `GOWORK=off GOLANGCI_LINT_CACHE=/tmp/configx-golangci-cache make ci` - 运行格式化、vet、lint、测试、race、boundary、security、contracts。
-- `GOWORK=off make integration` - 渲染 baselibx/corekit 模板并运行集成检查。
+- `GOWORK=off make integration` - 渲染 kernel/configx/redisx 模板并运行集成检查。
 
 新增脚本必须提交并记录用途。脚本应能从仓库根目录运行，必要时自行 `cd` 到根目录。
 

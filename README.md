@@ -47,7 +47,7 @@ safe := result.Sanitize() // secret 值已脱敏
 - `LoadResult`、`Value`、`SourceReport`、`SanitizedResult`：检查已加载 values 与 source 证据。
 - `Decode`：从 `LoadResult` 填充调用方 structs。
 - `SecretString`、`NewSecretString`、`IsSecretKey`：由 `foundationx` compatibility 支持的 secret 处理 helpers。
-- `Config`、`New`、`Close`、`HealthCheck`、`Error`、`Metrics`：从 baselib template 保留的基础库契约。
+- `Config`、`New`、`Close`、`HealthCheck`、`Error`、`Metrics`：从 xlib-standard 继承的基础库契约。
 
 ## 非目标
 

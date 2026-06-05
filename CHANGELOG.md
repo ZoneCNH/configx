@@ -27,7 +27,7 @@
 - `golangci-lint run ./...` 零告警。
 - 覆盖率 97.1%。
 
-## 未发布
+## v0.1.4 - 2026-06-06
 
 ### 新增
 
@@ -36,6 +36,8 @@
 ### 治理
 
 - 扩展配置 source 文档与回归测试，锁定嵌套 key 展开、last-wins merge、source report path/value keys 和 secret redaction 行为。
+- 记录 `xlib-standard` v0.4.19 L1 partial adoption provenance，并将模板渲染 smoke matrix 对齐到 `kernel`、`configx`、`redisx`。
+- 模板集成验证新增 `go mod tidy` drift check、旧标准名扫描和 release evidence check，避免下游模板继承过期命名或不完整发布证据。
 
 ## v0.1.1 - 2026-06-01
 
@@ -68,7 +70,7 @@
 - 添加 client 生命周期、健康检查和请求扩展 metrics contract。
 - 添加 health JSON contract 与 contracts 回归测试。
 - 添加 config schema 到 `Config` 字段映射的 contract 回归测试。
-- 添加 `scripts/render_template.sh`，支持生成 `baselibx` 等具体基础库。
+- 添加 `scripts/render_template.sh`，支持按 `xlib-standard` 渲染具体基础库。
 - 添加 `examples/basic`、`examples/config` 和 `examples/health` smoke 测试，锁定文档示例输出。
 - 添加 `testkit` 夹具和断言回归测试。
 - 添加配置属性测试、配置 fuzz smoke 测试、健康状态 golden 测试和 `testkit` golden 文件工具。
@@ -86,7 +88,7 @@
 - CI 流程在 `make ci` 前安装 `golangci-lint` 和 `govulncheck`，与 Makefile 强制 gate 对齐。
 - `make release-check` 统一执行 CI、integration 和 manifest 生成。
 - `make release-final-check` 在发布前串联 `release-check`、发布证据校验和工作区洁净校验。
-- `make integration` 通过临时 `baselibx` 和 `corekit` 渲染、测试、contracts、boundary 与发布证据生成验证模板链路。
+- `make integration` 通过临时 `kernel`、`configx` 和 `redisx` 渲染、测试、contracts、boundary 与发布证据生成验证模板链路。
 - `release/manifest/latest.json` 作为生成产物保留在源码历史之外，避免发布证据与源码提交互相污染。
 
 ### 验证

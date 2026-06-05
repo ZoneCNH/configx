@@ -1,6 +1,6 @@
 # configx 模板应用复盘
 
-评审已应用的 baselib template 与 `configx` goal 是否一致时，使用本检查清单。
+评审已应用的 xlib-standard 同步与 `configx` goal 是否一致时，使用本检查清单。
 
 ## 2026-06-01 模板与 foundation 复盘记录
 

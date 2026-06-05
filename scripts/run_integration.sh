@@ -5,8 +5,9 @@ tmpdir="$(mktemp -d)"
 trap 'rm -rf "$tmpdir"' EXIT
 
 cases=(
-  "baselibx|github.com/ZoneCNH/baselibx|baselibx"
-  "corekit|example.com/acme/corekit|corekit"
+  "kernel|github.com/ZoneCNH/kernel|kernel"
+  "configx|github.com/ZoneCNH/configx|configx"
+  "redisx|github.com/ZoneCNH/redisx|redisx"
 )
 
 for spec in "${cases[@]}"; do
@@ -29,6 +30,8 @@ for spec in "${cases[@]}"; do
     git add .
     git commit -qm "Initial rendered template"
 
+    GOWORK=off go mod tidy
+    git diff --exit-code -- go.mod go.sum
     GOWORK=off go test ./...
     GOWORK=off make contracts
     GOWORK=off make boundary

@@ -38,4 +38,6 @@ GitHub Actions 运行 `GOWORK=off make release-check`，并上传 `release/manif
 
 ## 下游模板安全线
 
-`make integration` 会渲染 `baselibx` 和 `corekit` 两个临时下游库，检查旧模板标识是否清空，并在下游库内生成、校验发布证据。这保证模板替换逻辑、contract gate、boundary gate 和证据工具不会只在模板仓库自身成立。
+`make integration` 会按 `xlib-standard` 当前 smoke matrix 渲染 `kernel`、`configx` 和 `redisx` 三个临时下游库，检查旧模板标识是否清空，并在下游库内生成、校验发布证据。这保证模板替换逻辑、contract gate、boundary gate 和证据工具不会只在模板仓库自身成立。
+
+当前仓库的标准状态记录在根目录 `xlib-standard.lock`。该 lock 表示 L1 partial adoption；goalcli governance surface 和 Docker Toolchain Runtime 尚未纳入本仓库默认 gate，后续如启用必须同时补齐对应 hooks、rulesets、makefile 和 harness 文件。

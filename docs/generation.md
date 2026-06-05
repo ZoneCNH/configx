@@ -2,19 +2,21 @@
 
 ## 用途
 
-`scripts/render_template.sh` 用于把 `configx` 渲染为具体基础库，例如 `baselibx`。脚本负责同步替换 module name、module path、package name、`pkg/` 目录名、imports、文档占位符和脚本中的模板名称。
+`scripts/render_template.sh` 用于把 `configx` 渲染为具体基础库。脚本负责同步替换 module name、module path、package name、`pkg/` 目录名、imports、文档占位符和脚本中的下游名称。
+
+当前仓库按 `xlib-standard` v0.4.19 的 L1 下游要求做部分对齐。根目录 `xlib-standard.lock` 记录标准来源、版本、commit 和本库的 layer/adoption 状态。
 
 ## 示例
 
 ```bash
 scripts/render_template.sh \
-  --module-name baselibx \
-  --module-path github.com/ZoneCNH/baselibx \
-  --package-name baselibx \
-  --out ../baselibx
+  --module-name kernel \
+  --module-path github.com/ZoneCNH/kernel \
+  --package-name kernel \
+  --out ../kernel
 ```
 
-`--out` 必须指向不存在或为空的目录，避免覆盖已有仓库内容。
+`--out` 必须指向源码仓库之外的不存在或为空目录，避免覆盖已有仓库内容。
 
 ## 渲染范围
 
@@ -23,7 +25,9 @@ scripts/render_template.sh \
 - `configx`、`pkg/configx` 和 `configx` imports 替换为 `--package-name`。
 - 文档、Go 代码、JSON contract、shell 脚本、Makefile 和 CI 配置同步更新。
 
-脚本不会复制 `.git`、`.omx`、`.worktree` 和 `release/manifest/latest.json`。`latest.json` 是生成产物，生成后的库必须自己运行 release gate 生成新的发布证据 artifact。
+脚本只复制 Git 跟踪文件，并显式排除生成的 release evidence 与根目录 `xlib-standard.lock`。因此 `.git`、`.omc`、`.omx`、`.worktree`、`.agent/inbox`、临时目录、本地覆盖率目录和被忽略的本地分析文件不会进入下游渲染结果。生成后的库必须自己运行 release gate 生成新的发布证据 artifact。
+
+`--enable-governance` 是完整 `xlib-standard` governance pack 的显式采用开关。当前 `configx` 尚未包含 goalcli、Docker Toolchain Runtime、governance makefile 和 hook/ruleset pack；因此该开关会在 pack 缺失时失败，避免把 partial adoption 误标成 full adoption。
 
 ## 验证
 
@@ -33,14 +37,16 @@ scripts/render_template.sh \
 GOWORK=off make release-check
 ```
 
-模板自身的 `make integration` 会渲染两个临时下游库：
+模板自身的 `make integration` 会渲染三个临时下游库：
 
-- `baselibx`：ZoneCNH 组织路径 `github.com/ZoneCNH/baselibx`，用于证明组织内迁移目标仍可生成，且不会与真实 `github.com/ZoneCNH/foundationx` 依赖形成自引用。
-- `corekit`：中性路径 `example.com/acme/corekit`，用于证明替换逻辑不依赖特定组织或包名。
+- `kernel`：L0 kernel 目标，用于证明最小基础库命名可以生成。
+- `configx`：L1 自身目标，用于证明同名渲染不会破坏路径或 package。
+- `redisx`：L2 downstream smoke 目标，用于证明非配置类基础库命名仍可生成。
 
 每个临时库都会运行以下验证：
 
-- `scripts/check_rendered_template.sh`：确认 `go.mod` module path、`pkg/<package>` 目录、旧模板目录、旧 module path、占位符和 `configx` 标识。
+- `scripts/check_rendered_template.sh`：确认 `go.mod` module path、`pkg/<package>` 目录、旧模板目录、旧 module path、旧 smoke 目标、占位符和 `configx` 标识。
+- `GOWORK=off go mod tidy` 后确认 `go.mod` / `go.sum` 不漂移。
 - `GOWORK=off go test ./...`
 - `GOWORK=off make contracts`
 - `GOWORK=off make boundary`
