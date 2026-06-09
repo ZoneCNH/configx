@@ -12,14 +12,13 @@ import (
 
 // TestSecretLeakGolden verifies that Sanitize replaces all secret values
 // with the redaction marker and that non-secret fields are preserved.
-// The golden file records the expected sanitized JSON output.
 func TestSecretLeakGolden(t *testing.T) {
 	tests := []struct {
 		name       string
 		keys       map[string]string
 		secretKeys []string
-		wantRedact []string // keys whose values must be masked
-		wantClear  []string // keys whose values must survive sanitization
+		wantRedact []string
+		wantClear  []string
 	}{
 		{
 			name: "password and token fields are redacted",
@@ -41,7 +40,7 @@ func TestSecretLeakGolden(t *testing.T) {
 				"SECRET_CONFIG": "internal",
 				"APP_HOST":      "localhost",
 			},
-			secretKeys: nil, // rely on IsSecretKey auto-detection
+			secretKeys: nil,
 			wantRedact: []string{"JWT_SECRET", "ACCESS_TOKEN", "SECRET_CONFIG"},
 			wantClear:  []string{"APP_HOST"},
 		},
@@ -67,7 +66,6 @@ func TestSecretLeakGolden(t *testing.T) {
 
 			sanitized := result.Sanitize()
 
-			// Verify secret values are replaced with redaction marker.
 			for _, key := range tt.wantRedact {
 				sv, ok := sanitized.Values[key]
 				if !ok {
@@ -81,7 +79,6 @@ func TestSecretLeakGolden(t *testing.T) {
 				}
 			}
 
-			// Verify non-secret values are preserved.
 			for _, key := range tt.wantClear {
 				sv, ok := sanitized.Values[key]
 				if !ok {
@@ -98,7 +95,6 @@ func TestSecretLeakGolden(t *testing.T) {
 				}
 			}
 
-			// Verify JSON output does not leak any secret values.
 			payload, err := json.Marshal(sanitized)
 			if err != nil {
 				t.Fatalf("marshal: %v", err)
@@ -117,7 +113,6 @@ func TestSecretLeakGolden(t *testing.T) {
 // TestSecretLeakGoldenOutput compares the sanitized Values map against a golden file.
 // We compare only Values (not Sources) because Sources contains non-deterministic timestamps.
 func TestSecretLeakGoldenOutput(t *testing.T) {
-	// Build a representative result with mixed secret and non-secret fields.
 	result, err := configx.NewLoader().
 		AddSource(configx.NewSecretMapSource("defaults", map[string]string{
 			"APP_NAME":      "myapp",
