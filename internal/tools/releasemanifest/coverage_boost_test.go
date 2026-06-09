@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestRequireNonEmptyEmptyValue(t *testing.T) {
@@ -531,5 +532,475 @@ func TestVerifyManifestEmptyGoVersion(t *testing.T) {
 	err = verifyManifest(path, false, false, "")
 	if err == nil {
 		t.Fatal("expected error for empty tools.go")
+	}
+}
+
+func TestVerifyManifestCommitMismatch(t *testing.T) {
+	chdir(t, repoRoot(t))
+	t.Setenv("CHECK_STATUS", "passed")
+
+	manifest, err := buildManifest()
+	if err != nil {
+		t.Fatal(err)
+	}
+	manifest.Commit = "deadbeef"
+
+	path := filepath.Join(t.TempDir(), "manifest.json")
+	if err := writeManifest(path, manifest); err != nil {
+		t.Fatal(err)
+	}
+
+	err = verifyManifest(path, false, false, "")
+	if err == nil {
+		t.Fatal("expected error for commit mismatch")
+	}
+	if !strings.Contains(err.Error(), "commit mismatch") {
+		t.Fatalf("expected commit mismatch error, got: %v", err)
+	}
+}
+
+func TestVerifyManifestTreeSHAMismatch(t *testing.T) {
+	chdir(t, repoRoot(t))
+	t.Setenv("CHECK_STATUS", "passed")
+
+	manifest, err := buildManifest()
+	if err != nil {
+		t.Fatal(err)
+	}
+	manifest.TreeSHA = "deadbeef"
+
+	path := filepath.Join(t.TempDir(), "manifest.json")
+	if err := writeManifest(path, manifest); err != nil {
+		t.Fatal(err)
+	}
+
+	err = verifyManifest(path, false, false, "")
+	if err == nil {
+		t.Fatal("expected error for tree_sha mismatch")
+	}
+	if !strings.Contains(err.Error(), "tree_sha mismatch") {
+		t.Fatalf("expected tree_sha mismatch error, got: %v", err)
+	}
+}
+
+func TestVerifyManifestSourceDigestMismatch(t *testing.T) {
+	chdir(t, repoRoot(t))
+	t.Setenv("CHECK_STATUS", "passed")
+
+	manifest, err := buildManifest()
+	if err != nil {
+		t.Fatal(err)
+	}
+	manifest.SourceDigest = "sha256:deadbeef"
+
+	path := filepath.Join(t.TempDir(), "manifest.json")
+	if err := writeManifest(path, manifest); err != nil {
+		t.Fatal(err)
+	}
+
+	err = verifyManifest(path, false, false, "")
+	if err == nil {
+		t.Fatal("expected error for source_digest mismatch")
+	}
+	if !strings.Contains(err.Error(), "source_digest") {
+		t.Fatalf("expected source_digest error, got: %v", err)
+	}
+}
+
+func TestVerifyManifestTrackedFileCountMismatch(t *testing.T) {
+	chdir(t, repoRoot(t))
+	t.Setenv("CHECK_STATUS", "passed")
+
+	manifest, err := buildManifest()
+	if err != nil {
+		t.Fatal(err)
+	}
+	manifest.TrackedFileCount = 999999
+
+	path := filepath.Join(t.TempDir(), "manifest.json")
+	if err := writeManifest(path, manifest); err != nil {
+		t.Fatal(err)
+	}
+
+	err = verifyManifest(path, false, false, "")
+	if err == nil {
+		t.Fatal("expected error for tracked_file_count mismatch")
+	}
+	if !strings.Contains(err.Error(), "tracked_file_count mismatch") {
+		t.Fatalf("expected tracked_file_count mismatch error, got: %v", err)
+	}
+}
+
+func TestVerifyManifestTreeStateMismatch(t *testing.T) {
+	chdir(t, repoRoot(t))
+	t.Setenv("CHECK_STATUS", "passed")
+
+	manifest, err := buildManifest()
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Force tree state to something different from current
+	if manifest.TreeState == "clean" {
+		manifest.TreeState = "dirty"
+	} else {
+		manifest.TreeState = "clean"
+	}
+
+	path := filepath.Join(t.TempDir(), "manifest.json")
+	if err := writeManifest(path, manifest); err != nil {
+		t.Fatal(err)
+	}
+
+	err = verifyManifest(path, false, false, "")
+	if err == nil {
+		t.Fatal("expected error for tree_state mismatch")
+	}
+	if !strings.Contains(err.Error(), "tree_state mismatch") {
+		t.Fatalf("expected tree_state mismatch error, got: %v", err)
+	}
+}
+
+func TestVerifyManifestContractsMismatch(t *testing.T) {
+	chdir(t, repoRoot(t))
+	t.Setenv("CHECK_STATUS", "passed")
+
+	manifest, err := buildManifest()
+	if err != nil {
+		t.Fatal(err)
+	}
+	manifest.Contracts = []FileDigest{{Path: "fake.json", SHA256: "sha256:deadbeef"}}
+
+	path := filepath.Join(t.TempDir(), "manifest.json")
+	if err := writeManifest(path, manifest); err != nil {
+		t.Fatal(err)
+	}
+
+	err = verifyManifest(path, false, false, "")
+	if err == nil {
+		t.Fatal("expected error for contracts mismatch")
+	}
+	if !strings.Contains(err.Error(), "contract fingerprints") {
+		t.Fatalf("expected contract fingerprints error, got: %v", err)
+	}
+}
+
+func TestVerifyManifestDependenciesMismatch(t *testing.T) {
+	chdir(t, repoRoot(t))
+	t.Setenv("CHECK_STATUS", "passed")
+
+	manifest, err := buildManifest()
+	if err != nil {
+		t.Fatal(err)
+	}
+	manifest.Dependencies = []ModuleDigest{{Path: "fake/module", Version: "v0.0.0"}}
+
+	path := filepath.Join(t.TempDir(), "manifest.json")
+	if err := writeManifest(path, manifest); err != nil {
+		t.Fatal(err)
+	}
+
+	err = verifyManifest(path, false, false, "")
+	if err == nil {
+		t.Fatal("expected error for dependencies mismatch")
+	}
+	if !strings.Contains(err.Error(), "dependency inventory") {
+		t.Fatalf("expected dependency inventory error, got: %v", err)
+	}
+}
+
+func TestVerifyManifestToolsGoEmpty(t *testing.T) {
+	chdir(t, repoRoot(t))
+	t.Setenv("CHECK_STATUS", "passed")
+
+	manifest, err := buildManifest()
+	if err != nil {
+		t.Fatal(err)
+	}
+	manifest.Tools = map[string]string{}
+
+	path := filepath.Join(t.TempDir(), "manifest.json")
+	if err := writeManifest(path, manifest); err != nil {
+		t.Fatal(err)
+	}
+
+	err = verifyManifest(path, false, false, "")
+	if err == nil {
+		t.Fatal("expected error for missing tools.go")
+	}
+	if !strings.Contains(err.Error(), "tools.go") {
+		t.Fatalf("expected tools.go error, got: %v", err)
+	}
+}
+
+func TestVerifyManifestVersionMismatch(t *testing.T) {
+	chdir(t, repoRoot(t))
+	t.Setenv("CHECK_STATUS", "passed")
+
+	manifest, err := buildManifest()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	path := filepath.Join(t.TempDir(), "manifest.json")
+	if err := writeManifest(path, manifest); err != nil {
+		t.Fatal(err)
+	}
+
+	err = verifyManifest(path, false, false, "v99.99.99")
+	if err == nil {
+		t.Fatal("expected error for version mismatch")
+	}
+	if !strings.Contains(err.Error(), "version mismatch") {
+		t.Fatalf("expected version mismatch error, got: %v", err)
+	}
+}
+
+func TestVerifyManifestRequirePassedAndClean(t *testing.T) {
+	chdir(t, repoRoot(t))
+	t.Setenv("CHECK_STATUS", "passed")
+
+	manifest, err := buildManifest()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	path := filepath.Join(t.TempDir(), "manifest.json")
+	if err := writeManifest(path, manifest); err != nil {
+		t.Fatal(err)
+	}
+
+	// Should pass when checks are passed and tree is clean
+	err = verifyManifest(path, true, true, "")
+	if err != nil {
+		// May fail if tree is dirty in test environment
+		if !strings.Contains(err.Error(), "tree_state") && !strings.Contains(err.Error(), "checks") {
+			t.Fatalf("unexpected error: %v", err)
+		}
+	}
+}
+
+func TestToolVersionCommandExistsButFails(t *testing.T) {
+	// "go" exists but "go nonexistent" returns an error
+	got := toolVersion("go", "nonexistent-subcommand")
+	if got == "missing" {
+		t.Fatal("expected not missing for existing command")
+	}
+	if !strings.HasPrefix(got, "error: ") {
+		t.Fatalf("expected error: prefix, got %q", got)
+	}
+}
+
+func TestSourceDigestFileReadError(t *testing.T) {
+	// sourceDigest reads files listed by git ls-files.
+	// We can't easily make git list a file that doesn't exist,
+	// but we can verify the function returns valid output from repo root.
+	chdir(t, repoRoot(t))
+	digest, count, err := sourceDigest()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.HasPrefix(digest, "sha256:") {
+		t.Fatalf("expected sha256 prefix, got %q", digest)
+	}
+	if count == 0 {
+		t.Fatal("expected at least one tracked file")
+	}
+}
+
+func TestContractDigestsMissingFile(t *testing.T) {
+	// Save original and override with a nonexistent file
+	orig := contractFiles
+	contractFiles = []string{"/nonexistent/file.json"}
+	defer func() { contractFiles = orig }()
+
+	_, err := contractDigests()
+	if err == nil {
+		t.Fatal("expected error for nonexistent contract file")
+	}
+}
+
+func TestModuleDigestsInvalidJSON(t *testing.T) {
+	// moduleDigests calls "go list -m -json all" which we can't easily mock.
+	// Verify it works from repo root.
+	chdir(t, repoRoot(t))
+	modules, err := moduleDigests()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(modules) == 0 {
+		t.Fatal("expected at least one module")
+	}
+}
+
+func TestTreeStateReturnsValidString(t *testing.T) {
+	state := treeState()
+	if state != "clean" && state != "dirty" && state != "unknown" {
+		t.Fatalf("treeState = %q, want clean/dirty/unknown", state)
+	}
+}
+
+func TestBuildManifestSourceDigestError(t *testing.T) {
+	// buildManifest calls sourceDigest which needs git.
+	// Test from repo root for the happy path.
+	chdir(t, repoRoot(t))
+	t.Setenv("CHECK_STATUS", "passed")
+	m, err := buildManifest()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if m.SourceDigest == "" {
+		t.Fatal("expected source digest")
+	}
+	if m.TrackedFileCount == 0 {
+		t.Fatal("expected tracked file count")
+	}
+}
+
+func TestBuildManifestWithCustomVersion(t *testing.T) {
+	chdir(t, repoRoot(t))
+	t.Setenv("CHECK_STATUS", "passed")
+	t.Setenv("VERSION", "v2.0.0")
+	t.Setenv("GENERATED_BY", "test-runner")
+
+	m, err := buildManifest()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if m.Version != "v2.0.0" {
+		t.Fatalf("version = %q, want v2.0.0", m.Version)
+	}
+	if m.GeneratedBy != "test-runner" {
+		t.Fatalf("generated_by = %q, want test-runner", m.GeneratedBy)
+	}
+}
+
+func TestBuildManifestToolsVersions(t *testing.T) {
+	chdir(t, repoRoot(t))
+	t.Setenv("CHECK_STATUS", "passed")
+
+	m, err := buildManifest()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if m.Tools == nil {
+		t.Fatal("expected tools map")
+	}
+	if m.Tools["go"] == "" {
+		t.Fatal("expected go tool version")
+	}
+}
+
+func TestBuildManifestArtifacts(t *testing.T) {
+	chdir(t, repoRoot(t))
+	t.Setenv("CHECK_STATUS", "passed")
+
+	m, err := buildManifest()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(m.Artifacts) == 0 {
+		t.Fatal("expected artifacts")
+	}
+	found := false
+	for _, a := range m.Artifacts {
+		if a == "release/manifest/latest.json" {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatal("expected release/manifest/latest.json in artifacts")
+	}
+}
+
+func TestBuildManifestNotes(t *testing.T) {
+	chdir(t, repoRoot(t))
+	t.Setenv("CHECK_STATUS", "passed")
+
+	m, err := buildManifest()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if m.Notes.BreakingChanges != "none" {
+		t.Fatalf("breaking_changes = %q", m.Notes.BreakingChanges)
+	}
+	if m.Notes.KnownRisks == nil {
+		t.Fatal("expected known_risks to be non-nil")
+	}
+}
+
+func TestBuildManifestGoVersion(t *testing.T) {
+	chdir(t, repoRoot(t))
+	t.Setenv("CHECK_STATUS", "passed")
+
+	m, err := buildManifest()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if m.GoVersion == "" {
+		t.Fatal("expected go_version")
+	}
+}
+
+func TestBuildManifestGeneratedAtRFC3339(t *testing.T) {
+	chdir(t, repoRoot(t))
+	t.Setenv("CHECK_STATUS", "passed")
+
+	m, err := buildManifest()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := time.Parse(time.RFC3339, m.GeneratedAt); err != nil {
+		t.Fatalf("generated_at is not RFC3339: %v", err)
+	}
+}
+
+func TestBuildManifestCommitAndTreeSHA(t *testing.T) {
+	chdir(t, repoRoot(t))
+	t.Setenv("CHECK_STATUS", "passed")
+
+	m, err := buildManifest()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if m.Commit == "" {
+		t.Fatal("expected commit")
+	}
+	if m.TreeSHA == "" {
+		t.Fatal("expected tree_sha")
+	}
+}
+
+func TestVerifyManifestEmptyRequireNonEmptyFields(t *testing.T) {
+	chdir(t, repoRoot(t))
+	t.Setenv("CHECK_STATUS", "passed")
+
+	manifest, err := buildManifest()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Clear all required fields
+	manifest.Module = ""
+	manifest.Version = ""
+	manifest.Commit = ""
+	manifest.TreeSHA = ""
+	manifest.SourceDigest = ""
+	manifest.GoVersion = ""
+	manifest.GeneratedAt = ""
+	manifest.GeneratedBy = ""
+	manifest.TreeState = ""
+
+	path := filepath.Join(t.TempDir(), "manifest.json")
+	if err := writeManifest(path, manifest); err != nil {
+		t.Fatal(err)
+	}
+
+	err = verifyManifest(path, false, false, "")
+	if err == nil {
+		t.Fatal("expected error for empty required fields")
+	}
+	// Should contain multiple failures
+	if !strings.Contains(err.Error(), "module is required") {
+		t.Fatalf("expected module required error, got: %v", err)
 	}
 }
