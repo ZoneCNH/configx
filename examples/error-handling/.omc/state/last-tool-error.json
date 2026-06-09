@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"go test -v -count=1 ./examples/error-handling/... 2>&1\",\"description\":\"Run error-handling example tests\"}",
+  "error": "Exit code 1\n# ./examples/error-handling/...\npattern ./examples/error-handling/...: lstat ./examples/error-handling/: no such file or directory\nFAIL\t./examples/error-handling/... [setup failed]\nFAIL",
+  "timestamp": "2026-06-04T07:05:23.730Z",
+  "retry_count": 1
+}
