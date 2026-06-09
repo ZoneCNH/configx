@@ -2149,3 +2149,95 @@ func TestDecodeWithConfigxTag(t *testing.T) {
 		t.Fatalf("name=%q", c.Name)
 	}
 }
+
+// --- Loader fills empty value defaults ---
+
+// emptyFieldSource is a Source that returns Values with empty Key, Source,
+// and zero LoadedAt so the Loader fills in defaults (loader.go:102-110).
+type emptyFieldSource struct{}
+
+func (s *emptyFieldSource) Name() string { return "empty-fields" }
+func (s *emptyFieldSource) Kind() string { return "test" }
+
+func (s *emptyFieldSource) Load(_ context.Context) (Map, error) {
+	return Map{
+		"KEY_A": {Value: "a"},                  // Key="", Source="", LoadedAt=zero
+		"KEY_B": {Value: "b", Key: "explicit"}, // Key set, Source empty
+	}, nil
+}
+
+func TestLoaderFillsEmptyValueDefaults(t *testing.T) {
+	loader := NewLoader().AddSource(&emptyFieldSource{})
+	result, err := loader.Load(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	va, ok := result.Get("KEY_A")
+	if !ok {
+		t.Fatal("expected KEY_A")
+	}
+	if va.Key != "KEY_A" {
+		t.Fatalf("expected Key=KEY_A, got %q", va.Key)
+	}
+	if va.Source != "empty-fields" {
+		t.Fatalf("expected Source=empty-fields, got %q", va.Source)
+	}
+	if va.LoadedAt.IsZero() {
+		t.Fatal("expected non-zero LoadedAt")
+	}
+	vb := result.Values["KEY_B"]
+	if vb.Key != "explicit" {
+		t.Fatalf("expected Key=explicit, got %q", vb.Key)
+	}
+	if vb.Source != "empty-fields" {
+		t.Fatalf("expected Source=empty-fields, got %q", vb.Source)
+	}
+}
+
+// --- EffectiveConfigHash volatile tag ---
+
+func TestEffectiveConfigHashVolatileTag(t *testing.T) {
+	type cfg struct {
+		Host    string `json:"host"`
+		Refresh int    `json:"refresh" volatile:"true"`
+	}
+	h1, err := EffectiveConfigHash(cfg{Host: "h", Refresh: 1})
+	if err != nil {
+		t.Fatal(err)
+	}
+	h2, err := EffectiveConfigHash(cfg{Host: "h", Refresh: 999})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if h1 != h2 {
+		t.Fatalf("volatile field should be excluded: %s != %s", h1, h2)
+	}
+}
+
+// --- Schema TextUnmarshaler field ---
+
+type textUnmarshalerValue struct {
+	data string
+}
+
+func (v *textUnmarshalerValue) UnmarshalText(b []byte) error {
+	v.data = string(b)
+	return nil
+}
+
+func TestSchemaTextUnmarshalerField(t *testing.T) {
+	type cfg struct {
+		Custom textUnmarshalerValue `config:"CUSTOM"`
+	}
+	schema := BuildSchema(cfg)
+	if schema == nil {
+		t.Fatal("expected non-nil schema")
+	}
+	customProp, ok := schema.Properties["CUSTOM"]
+	if !ok {
+		t.Fatal("expected CUSTOM property")
+	}
+	if customProp.Type != "string" {
+		t.Fatalf("expected type=string, got %q", customProp.Type)
+	}
+}

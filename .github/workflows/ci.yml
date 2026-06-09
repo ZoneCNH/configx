@@ -6,6 +6,26 @@ on:
     branches: [main]
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - name: Coverage Report
+        run: |
+          pkgs=$(go list ./... | grep -v internal/tools)
+          go test -coverpkg=./pkg/... $pkgs -coverprofile=coverage.out -covermode=atomic -timeout 180s
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.out
+          if-no-files-found: warn
+
   docs-contracts:
     runs-on: ubuntu-latest
     steps:

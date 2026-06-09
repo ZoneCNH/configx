@@ -123,3 +123,13 @@ func TestEffectiveConfigHashStructUnexportedFields(t *testing.T) {
 		t.Fatal("expected non-empty hash")
 	}
 }
+
+func TestEffectiveConfigHashNil(t *testing.T) {
+	_, err := EffectiveConfigHash(nil)
+	if err == nil {
+		t.Fatal("expected error for nil config")
+	}
+	if !IsKind(err, ErrorKindValidation) {
+		t.Fatalf("expected validation error kind, got: %v", err)
+	}
+}
