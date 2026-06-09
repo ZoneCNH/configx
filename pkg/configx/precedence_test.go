@@ -17,9 +17,9 @@ func TestSourcePrecedenceGolden(t *testing.T) {
 	tests := []struct {
 		name       string
 		sources    []configx.Source
-		wantValues map[string]string // key -> expected final value
-		wantSource map[string]string // key -> expected winning source name
-		wantOver   map[string]bool   // key -> expected Overridden flag
+		wantValues map[string]string
+		wantSource map[string]string
+		wantOver   map[string]bool
 	}{
 		{
 			name: "env overrides default",
@@ -66,9 +66,9 @@ func TestSourcePrecedenceGolden(t *testing.T) {
 				}),
 			},
 			wantValues: map[string]string{
-				"APP_PORT":  "9999",  // flags wins
-				"APP_DEBUG": "false", // only in defaults
-				"DB_HOST":   "env-db", // env wins over file and default
+				"APP_PORT":  "9999",
+				"APP_DEBUG": "false",
+				"DB_HOST":   "env-db",
 			},
 			wantSource: map[string]string{
 				"APP_PORT":  "flags",
@@ -115,7 +115,6 @@ func TestSourcePrecedenceGolden(t *testing.T) {
 				t.Fatalf("load: %v", err)
 			}
 
-			// Verify final values.
 			for key, want := range tt.wantValues {
 				got, ok := result.Get(key)
 				if !ok {
@@ -126,7 +125,6 @@ func TestSourcePrecedenceGolden(t *testing.T) {
 				}
 			}
 
-			// Verify provenance: source name.
 			for key, wantSrc := range tt.wantSource {
 				v, ok := result.Values[key]
 				if !ok {
@@ -137,7 +135,6 @@ func TestSourcePrecedenceGolden(t *testing.T) {
 				}
 			}
 
-			// Verify provenance: Overridden flag.
 			for key, wantOver := range tt.wantOver {
 				v, ok := result.Values[key]
 				if !ok {
@@ -184,7 +181,6 @@ func TestSourcePrecedenceGoldenOutput(t *testing.T) {
 		t.Fatalf("load: %v", err)
 	}
 
-	// Extract the sanitized values map for golden comparison (sorted by key via json.Marshal).
 	payload, err := json.MarshalIndent(result.Sanitize().Values, "", "  ")
 	if err != nil {
 		t.Fatalf("marshal: %v", err)
