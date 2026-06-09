@@ -1,0 +1,51 @@
+{
+  "APP_DEBUG": {
+    "key": "APP_DEBUG",
+    "value": "true",
+    "secret": false,
+    "source": "flags",
+    "overridden": true
+  },
+  "APP_HOST": {
+    "key": "APP_HOST",
+    "value": "file-host",
+    "secret": false,
+    "source": "file",
+    "overridden": true
+  },
+  "APP_NAME": {
+    "key": "APP_NAME",
+    "value": "env-name",
+    "secret": false,
+    "source": "env",
+    "overridden": true
+  },
+  "APP_PORT": {
+    "key": "APP_PORT",
+    "value": "9999",
+    "secret": false,
+    "source": "flags",
+    "overridden": true
+  },
+  "DB_HOST": {
+    "key": "DB_HOST",
+    "value": "env-db",
+    "secret": false,
+    "source": "env",
+    "overridden": true
+  },
+  "DB_PORT": {
+    "key": "DB_PORT",
+    "value": "5432",
+    "secret": false,
+    "source": "defaults",
+    "overridden": false
+  },
+  "LOG_LEVEL": {
+    "key": "LOG_LEVEL",
+    "value": "file-level",
+    "secret": false,
+    "source": "file",
+    "overridden": true
+  }
+}
