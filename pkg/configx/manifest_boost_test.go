@@ -22,6 +22,47 @@ func TestSanitizedManifestMapWithSecretKey(t *testing.T) {
 	}
 }
 
+func TestSanitizedManifestMapWithNestedStructValue(t *testing.T) {
+	type inner struct {
+		Value  string
+		Secret string
+	}
+	// Use a concrete map type so dereference can reach the struct branch.
+	m := SanitizedManifest(map[string]*inner{
+		"structVal": {Value: "ok", Secret: "hidden"},
+	})
+
+	structVal, ok := m["structVal"].(map[string]any)
+	if !ok {
+		t.Fatalf("structVal type = %T, want map[string]any", m["structVal"])
+	}
+	if structVal["Value"] != "ok" {
+		t.Fatalf("structVal.Value = %v", structVal["Value"])
+	}
+	if structVal["Secret"] != redactionMarker {
+		t.Fatalf("structVal.Secret = %v, want %v", structVal["Secret"], redactionMarker)
+	}
+}
+
+func TestSanitizedManifestMapWithNestedMapValue(t *testing.T) {
+	// Use a concrete map type so dereference can reach the map branch.
+	inner := map[string]string{"token": "secret123", "host": "localhost"}
+	m := SanitizedManifest(map[string]map[string]string{
+		"nested": inner,
+	})
+
+	nested, ok := m["nested"].(map[string]any)
+	if !ok {
+		t.Fatalf("nested type = %T, want map[string]any", m["nested"])
+	}
+	if nested["host"] != "localhost" {
+		t.Fatalf("nested.host = %v", nested["host"])
+	}
+	if nested["token"] != redactionMarker {
+		t.Fatalf("nested.token = %v, want %v", nested["token"], redactionMarker)
+	}
+}
+
 func TestSanitizedManifestMapNonSecretPreserved(t *testing.T) {
 	m := SanitizedManifest(map[string]any{
 		"host": "localhost",
