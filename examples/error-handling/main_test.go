@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"os"
 	"strings"
@@ -44,6 +45,68 @@ func TestMainOutput(t *testing.T) {
 	if !strings.Contains(output, "caught validation error as expected") {
 		t.Errorf("expected validation error message in output, got:\n%s", output)
 	}
+}
+
+func TestValidateValidPort(t *testing.T) {
+	cfg := appConfig{Name: "test", Port: 8080}
+	if err := cfg.Validate(); err != nil {
+		t.Fatalf("expected no error for valid port, got %v", err)
+	}
+}
+
+func TestValidatePortTooLow(t *testing.T) {
+	cfg := appConfig{Name: "test", Port: 0}
+	err := cfg.Validate()
+	if err == nil {
+		t.Fatal("expected error for port 0")
+	}
+}
+
+func TestValidatePortTooHigh(t *testing.T) {
+	cfg := appConfig{Name: "test", Port: 70000}
+	err := cfg.Validate()
+	if err == nil {
+		t.Fatal("expected error for port 70000")
+	}
+}
+
+func TestMissingFileErrOutput(t *testing.T) {
+	output := captureStdout(t, func() { missingFileErr(context.Background()) })
+	if !strings.Contains(output, "kind=") {
+		t.Errorf("expected kind= in output, got: %s", output)
+	}
+}
+
+func TestInvalidFormatErrOutput(t *testing.T) {
+	output := captureStdout(t, func() { invalidFormatErr(nilContext()) })
+	if !strings.Contains(output, "kind=") {
+		t.Errorf("expected kind= in output, got: %s", output)
+	}
+}
+
+func TestMergePriorityOutput(t *testing.T) {
+	output := captureStdout(t, func() { mergePriority(context.Background()) })
+	if !strings.Contains(output, "APP_NAME") {
+		t.Errorf("expected APP_NAME in output, got: %s", output)
+	}
+}
+
+func TestSecretRedactionOutput(t *testing.T) {
+	output := captureStdout(t, func() { secretRedaction(context.Background()) })
+	if !strings.Contains(output, "raw") {
+		t.Errorf("expected raw in output, got: %s", output)
+	}
+}
+
+func TestValidationErrorOutput(t *testing.T) {
+	output := captureStdout(t, func() { validationError(nilContext()) })
+	if !strings.Contains(output, "validation") {
+		t.Errorf("expected validation in output, got: %s", output)
+	}
+}
+
+func nilContext() context.Context {
+	return nil
 }
 
 func captureStdout(t *testing.T, fn func()) string {

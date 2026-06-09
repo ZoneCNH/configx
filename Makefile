@@ -18,11 +18,11 @@ vet: local-cache-dirs
 
 .PHONY: test
 test: local-cache-dirs
-	go test ./...
+	go test -coverpkg=./pkg/... $$(go list ./... | grep -v internal/tools)
 
 .PHONY: race
 race: local-cache-dirs
-	go test -race ./...
+	go test -race -coverpkg=./pkg/... $$(go list ./... | grep -v internal/tools)
 
 .PHONY: lint
 lint: local-cache-dirs
