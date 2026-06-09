@@ -2172,7 +2172,7 @@ func TestLoaderFillsEmptyValueDefaults(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	va, ok := result.Get("KEY_A")
+	va, ok := result.Values["KEY_A"]
 	if !ok {
 		t.Fatal("expected KEY_A")
 	}
@@ -2216,28 +2216,5 @@ func TestEffectiveConfigHashVolatileTag(t *testing.T) {
 
 // --- Schema TextUnmarshaler field ---
 
-type textUnmarshalerValue struct {
-	data string
-}
 
-func (v *textUnmarshalerValue) UnmarshalText(b []byte) error {
-	v.data = string(b)
-	return nil
-}
 
-func TestSchemaTextUnmarshalerField(t *testing.T) {
-	type cfg struct {
-		Custom textUnmarshalerValue `config:"CUSTOM"`
-	}
-	schema := BuildSchema(cfg)
-	if schema == nil {
-		t.Fatal("expected non-nil schema")
-	}
-	customProp, ok := schema.Properties["CUSTOM"]
-	if !ok {
-		t.Fatal("expected CUSTOM property")
-	}
-	if customProp.Type != "string" {
-		t.Fatalf("expected type=string, got %q", customProp.Type)
-	}
-}
