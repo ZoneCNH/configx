@@ -1,0 +1,450 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1780554664143,
+  "projectRoot": "/home/configx",
+  "techStack": {
+    "languages": [
+      {
+        "name": "Go",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "go.mod"
+        ]
+      },
+      {
+        "name": "C/C++",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "Makefile"
+        ]
+      }
+    ],
+    "frameworks": [],
+    "packageManager": "go",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": "GOWORK=off go build ./... 2>&1; echo \"EXIT:$?\"",
+    "testCommand": "go test -coverprofile=/tmp/cover.out ./pkg/configx/ 2>&1 && go tool cover -func=/tmp/cover.out | tail -1",
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "docs",
+      "examples",
+      "scripts"
+    ],
+    "gitBranches": {
+      "defaultBranch": "main",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "contracts": {
+      "path": "contracts",
+      "purpose": null,
+      "fileCount": 9,
+      "lastAccessed": 1780554664120,
+      "keyFiles": [
+        "config.schema.json",
+        "contracts_test.go",
+        "error.schema.json",
+        "foundationx_compat_test.go",
+        "foundationx_contract_test.go"
+      ]
+    },
+    "docs": {
+      "path": "docs",
+      "purpose": "Documentation",
+      "fileCount": 17,
+      "lastAccessed": 1780554664121,
+      "keyFiles": [
+        "api.md",
+        "config.md",
+        "contracts.md",
+        "design.md",
+        "errors.md"
+      ]
+    },
+    "examples": {
+      "path": "examples",
+      "purpose": "Example code",
+      "fileCount": 0,
+      "lastAccessed": 1780554664122,
+      "keyFiles": []
+    },
+    "internal": {
+      "path": "internal",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1780554664123,
+      "keyFiles": []
+    },
+    "pkg": {
+      "path": "pkg",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1780554664123,
+      "keyFiles": []
+    },
+    "release": {
+      "path": "release",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1780554664124,
+      "keyFiles": []
+    },
+    "scripts": {
+      "path": "scripts",
+      "purpose": "Build/utility scripts",
+      "fileCount": 10,
+      "lastAccessed": 1780554664125,
+      "keyFiles": [
+        "check_boundary.sh",
+        "check_contracts.sh",
+        "check_release_evidence.sh",
+        "check_release_preflight.sh",
+        "check_rendered_template.sh"
+      ]
+    },
+    "testkit": {
+      "path": "testkit",
+      "purpose": null,
+      "fileCount": 6,
+      "lastAccessed": 1780554664126,
+      "keyFiles": [
+        "README.md",
+        "assert.go",
+        "fixture.go",
+        "fixture_test.go",
+        "golden.go"
+      ]
+    },
+    "examples/config": {
+      "path": "examples/config",
+      "purpose": "Configuration files",
+      "fileCount": 2,
+      "lastAccessed": 1780554664127,
+      "keyFiles": [
+        "main.go",
+        "main_test.go"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "internal/tools/releasemanifest/main.go",
+      "accessCount": 10,
+      "lastAccessed": 1780556573886,
+      "type": "file"
+    },
+    {
+      "path": "docs/project-analysis-20260604.md",
+      "accessCount": 9,
+      "lastAccessed": 1780605561814,
+      "type": "file"
+    },
+    {
+      "path": "pkg/configx/errors.go",
+      "accessCount": 6,
+      "lastAccessed": 1780605067536,
+      "type": "file"
+    },
+    {
+      "path": "contracts/contracts_test.go",
+      "accessCount": 4,
+      "lastAccessed": 1780556360629,
+      "type": "file"
+    },
+    {
+      "path": "docs/goal1.md",
+      "accessCount": 4,
+      "lastAccessed": 1780559673306,
+      "type": "file"
+    },
+    {
+      "path": "pkg/configx/config.go",
+      "accessCount": 4,
+      "lastAccessed": 1780605066389,
+      "type": "file"
+    },
+    {
+      "path": "pkg/configx/core.go",
+      "accessCount": 4,
+      "lastAccessed": 1780605325984,
+      "type": "file"
+    },
+    {
+      "path": "pkg/configx/structured_sources.go",
+      "accessCount": 4,
+      "lastAccessed": 1780605326470,
+      "type": "file"
+    },
+    {
+      "path": "internal/tools/releasemanifest/main_test.go",
+      "accessCount": 3,
+      "lastAccessed": 1780556575062,
+      "type": "file"
+    },
+    {
+      "path": "pkg/configx/core_test.go",
+      "accessCount": 3,
+      "lastAccessed": 1780556752682,
+      "type": "file"
+    },
+    {
+      "path": "docs/adr/ADR-001-last-wins-merge-strategy.md",
+      "accessCount": 3,
+      "lastAccessed": 1780559625679,
+      "type": "file"
+    },
+    {
+      "path": "docs/adr/ADR-002-no-global-state.md",
+      "accessCount": 3,
+      "lastAccessed": 1780559627411,
+      "type": "file"
+    },
+    {
+      "path": "docs/adr/ADR-003-explicit-config-loading.md",
+      "accessCount": 3,
+      "lastAccessed": 1780559630645,
+      "type": "file"
+    },
+    {
+      "path": "README.md",
+      "accessCount": 3,
+      "lastAccessed": 1780605036478,
+      "type": "file"
+    },
+    {
+      "path": "pkg/configx/source_env.go",
+      "accessCount": 3,
+      "lastAccessed": 1780605077406,
+      "type": "file"
+    },
+    {
+      "path": "pkg/configx/health.go",
+      "accessCount": 3,
+      "lastAccessed": 1780605080378,
+      "type": "file"
+    },
+    {
+      "path": "pkg/configx/client.go",
+      "accessCount": 3,
+      "lastAccessed": 1780605081974,
+      "type": "file"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "accessCount": 3,
+      "lastAccessed": 1780605093367,
+      "type": "file"
+    },
+    {
+      "path": "examples/error-handling/main.go",
+      "accessCount": 3,
+      "lastAccessed": 1780605118979,
+      "type": "file"
+    },
+    {
+      "path": "pkg/configx/merge.go",
+      "accessCount": 3,
+      "lastAccessed": 1780605325873,
+      "type": "file"
+    },
+    {
+      "path": "pkg/configx/source_file.go",
+      "accessCount": 3,
+      "lastAccessed": 1780605327253,
+      "type": "file"
+    },
+    {
+      "path": "pkg/configx/version.go",
+      "accessCount": 3,
+      "lastAccessed": 1780605327415,
+      "type": "file"
+    },
+    {
+      "path": "pkg/configx/source_map.go",
+      "accessCount": 3,
+      "lastAccessed": 1780605327556,
+      "type": "file"
+    },
+    {
+      "path": "pkg/configx/errors_test.go",
+      "accessCount": 2,
+      "lastAccessed": 1780556755889,
+      "type": "file"
+    },
+    {
+      "path": "AGENTS.md",
+      "accessCount": 2,
+      "lastAccessed": 1780605036579,
+      "type": "file"
+    },
+    {
+      "path": ".golangci.yml",
+      "accessCount": 2,
+      "lastAccessed": 1780605053194,
+      "type": "file"
+    },
+    {
+      "path": "pkg/configx/doc.go",
+      "accessCount": 2,
+      "lastAccessed": 1780605063667,
+      "type": "file"
+    },
+    {
+      "path": "pkg/configx/loader.go",
+      "accessCount": 2,
+      "lastAccessed": 1780605065321,
+      "type": "file"
+    },
+    {
+      "path": "pkg/configx/result.go",
+      "accessCount": 2,
+      "lastAccessed": 1780605067616,
+      "type": "file"
+    },
+    {
+      "path": "pkg/configx/source.go",
+      "accessCount": 2,
+      "lastAccessed": 1780605067688,
+      "type": "file"
+    },
+    {
+      "path": "pkg/configx/secret.go",
+      "accessCount": 2,
+      "lastAccessed": 1780605068392,
+      "type": "file"
+    },
+    {
+      "path": "pkg/configx/metrics.go",
+      "accessCount": 2,
+      "lastAccessed": 1780605079888,
+      "type": "file"
+    },
+    {
+      "path": "examples/config/main.go",
+      "accessCount": 2,
+      "lastAccessed": 1780605118102,
+      "type": "file"
+    },
+    {
+      "path": "examples/basic/main.go",
+      "accessCount": 2,
+      "lastAccessed": 1780605118871,
+      "type": "file"
+    },
+    {
+      "path": "pkg/configx/options.go",
+      "accessCount": 2,
+      "lastAccessed": 1780605324772,
+      "type": "file"
+    },
+    {
+      "path": "internal/sanitize/sanitize.go",
+      "accessCount": 1,
+      "lastAccessed": 1780556111076,
+      "type": "file"
+    },
+    {
+      "path": "internal/validation/validation.go",
+      "accessCount": 1,
+      "lastAccessed": 1780556111199,
+      "type": "file"
+    },
+    {
+      "path": "internal/sanitize/sanitize_test.go",
+      "accessCount": 1,
+      "lastAccessed": 1780556112873,
+      "type": "file"
+    },
+    {
+      "path": "internal/validation/validation_test.go",
+      "accessCount": 1,
+      "lastAccessed": 1780556114624,
+      "type": "file"
+    },
+    {
+      "path": "examples/basic/main_test.go",
+      "accessCount": 1,
+      "lastAccessed": 1780556135016,
+      "type": "file"
+    },
+    {
+      "path": "examples/health/main_test.go",
+      "accessCount": 1,
+      "lastAccessed": 1780556343334,
+      "type": "file"
+    },
+    {
+      "path": "examples/config/main_test.go",
+      "accessCount": 1,
+      "lastAccessed": 1780556344879,
+      "type": "file"
+    },
+    {
+      "path": "examples/error-handling/main_test.go",
+      "accessCount": 1,
+      "lastAccessed": 1780556522499,
+      "type": "file"
+    },
+    {
+      "path": "pkg/configx/core_bench_test.go",
+      "accessCount": 1,
+      "lastAccessed": 1780556531386,
+      "type": "file"
+    },
+    {
+      "path": "pkg/configx/client_test.go",
+      "accessCount": 1,
+      "lastAccessed": 1780556753426,
+      "type": "file"
+    },
+    {
+      "path": "pkg/configx/config_test.go",
+      "accessCount": 1,
+      "lastAccessed": 1780556753945,
+      "type": "file"
+    },
+    {
+      "path": "pkg/configx/structured_sources_test.go",
+      "accessCount": 1,
+      "lastAccessed": 1780556789536,
+      "type": "file"
+    },
+    {
+      "path": "go.mod",
+      "accessCount": 1,
+      "lastAccessed": 1780605050434,
+      "type": "file"
+    },
+    {
+      "path": "Makefile",
+      "accessCount": 1,
+      "lastAccessed": 1780605052749,
+      "type": "file"
+    },
+    {
+      "path": "internal/foundationx/go.mod",
+      "accessCount": 1,
+      "lastAccessed": 1780605092285,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}
