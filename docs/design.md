@@ -2,15 +2,15 @@
 
 ## 架构
 
-生成的库是独立 Go module。公共 API 位于 `pkg/configx`，内部辅助代码位于 `internal/`，契约位于 `contracts/`，运行证据位于 `release/manifest/`。`scripts/render_template.sh` 是模板到具体基础库的唯一内置渲染入口。
+`configx` 是 FoundationX L1 运行时配置库。公共 API 位于 `pkg/configx`，内部辅助代码位于 `internal/`，契约位于 `contracts/`，运行证据位于 `release/manifest/`。作为独立 Go module，configx 不依赖 xlib-standard 模板渲染。
 
 ## 公共 API
 
-模板暴露 `Config`、`SanitizedConfig`、`Client`、`New`、`Close`、`Option`、`HealthCheck`、`Error`、`NewError`、`WrapError`、`IsKind`、`Metrics`、`NoopMetrics`、指标常量、`ModuleName` 和 `Version`。
+`configx` 暴露 `Config`、`SanitizedConfig`、`Client`、`New`、`Close`、`Option`、`HealthCheck`、`Error`、`NewError`、`WrapError`、`IsKind`、`Metrics`、`NoopMetrics`、指标常量、`ModuleName` 和 `Version`。
 
 ## 配置
 
-调用方必须显式传入配置。生成的库不得隐式读取 `x.go` 生产密钥路径。`Validate` 使用稳定校验错误表达缺失字段和负数 timeout，`Sanitize` 只返回可安全记录的脱敏视图。`contracts/config.schema.json` 使用外部字段 `timeout_ms`，并通过契约回归测试锁定到 `Config.Timeout`。
+调用方必须显式传入配置。`configx` 不得隐式读取 `x.go` 生产密钥路径。`Validate` 使用稳定校验错误表达缺失字段和负数 timeout，`Sanitize` 只返回可安全记录的脱敏视图。`contracts/config.schema.json` 使用外部字段 `timeout_ms`，并通过契约回归测试锁定到 `Config.Timeout`。
 
 ## 错误模型
 

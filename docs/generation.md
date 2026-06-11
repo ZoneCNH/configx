@@ -1,10 +1,13 @@
-# 生成模板
+# 模板生成（集成测试用）
+
+> ⚠️ **身份声明**：`configx` 是 L1 运行时配置库（concrete library），不是模板源。
+> 模板生成的标准源是 `xlib-standard`。本地 `render_template.sh` 仅用于 CI 集成测试验证，
+> 确保 configx 作为 L1 模块可以被 `xlib-standard` 的 Generator 正确渲染。
+> 计划在 configx v0.3 foundationx 迁移时将此基础设施移回 xlib-standard。
 
 ## 用途
 
-`scripts/render_template.sh` 用于把 `configx` 渲染为具体基础库。脚本负责同步替换 module name、module path、package name、`pkg/` 目录名、imports、文档占位符和脚本中的下游名称。
-
-当前仓库按 `xlib-standard` v0.4.19 的 L1 下游要求做部分对齐。根目录 `xlib-standard.lock` 记录标准来源、版本、commit 和本库的 layer/adoption 状态。
+`scripts/render_template.sh` 是 `xlib-standard` Generator 的本地副本，用于 CI 集成测试中验证模板渲染正确性。
 
 ## 示例
 
