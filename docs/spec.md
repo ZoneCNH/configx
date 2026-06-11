@@ -13,15 +13,15 @@
 - `GOWORK=off make release-check` 通过，并以 `CHECK_STATUS=passed` 生成未提交的 `release/manifest/latest.json` 发布证据 artifact。
 - `contracts/config.schema.json` 与 `Config` 字段映射保持一致，`timeout_ms` 映射到 `Config.Timeout`。
 - `contracts/error.schema.json`、`contracts/health.schema.json` 和 `contracts/metrics.md` 与公共常量保持一致。
-- `scripts/render_template.sh` 可以生成非自引用的 ZoneCNH 基础库形态并通过 `GOWORK=off go test ./...`。
 - 模块不得依赖 `github.com/bytechainx/x.go` 或 `github.com/ZoneCNH/x.go`。
 - 模块不得隐式读取生产密钥。
 
 ## 非目标
 
 - 不包含业务模型、生产连接默认值和隐藏全局客户端。
+- 不作为 xlib-standard 模板渲染目标（configx 是 concrete library，不是 template instance）。
 
 ## 可追踪性
 
 - 目标：`GOAL-20260601-001`
-- 模板占位符：`configx`、`github.com/ZoneCNH/configx`、`configx`
+- 模块：`github.com/ZoneCNH/configx`

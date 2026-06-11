@@ -2,17 +2,41 @@ package configx
 
 import (
 	"context"
-
-	foundationx "github.com/ZoneCNH/foundationx"
+	"encoding/json"
 )
 
 const redactionMarker = "***"
 
-// SecretString is an alias for foundationx.SecretString.
-type SecretString = foundationx.SecretString
+// SecretString stores a secret and masks it by default when formatted.
+type SecretString string
 
 // NewSecretString creates a new SecretString.
-func NewSecretString(value string) SecretString { return foundationx.NewSecretString(value) }
+func NewSecretString(value string) SecretString { return SecretString(value) }
+
+func (s SecretString) String() string {
+	if s == "" {
+		return ""
+	}
+	return redactionMarker
+}
+
+// Reveal returns the underlying secret value.
+func (s SecretString) Reveal() string { return string(s) }
+
+// Sanitize masks the secret for safe logging.
+func (s SecretString) Sanitize() any { return s.String() }
+
+// IsZero reports whether the secret is empty.
+func (s SecretString) IsZero() bool { return s == "" }
+
+// GoString masks the secret in %#v output.
+func (s SecretString) GoString() string { return s.String() }
+
+// MarshalText implements encoding.TextMarshaler with redaction.
+func (s SecretString) MarshalText() ([]byte, error) { return []byte(s.String()), nil }
+
+// MarshalJSON implements json.Marshaler with redaction.
+func (s SecretString) MarshalJSON() ([]byte, error) { return json.Marshal(s.String()) }
 
 // LoadEnv is a convenience function that loads configuration from environment variables.
 func LoadEnv(ctx context.Context, prefix string, keys []string) (LoadResult, error) {
