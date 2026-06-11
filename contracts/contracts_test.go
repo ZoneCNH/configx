@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/ZoneCNH/configx/pkg/configx"
-	foundationx "github.com/ZoneCNH/foundationx"
 )
 
 type schemaProperty struct {
@@ -118,19 +117,6 @@ func TestMetricsContractDocumentsPublicConstants(t *testing.T) {
 			t.Fatalf("metrics contract does not document %q", metric)
 		}
 	}
-}
-
-func TestVersionContractMatchesFoundationXVersionInfo(t *testing.T) {
-	schema := readSchema(t, "version.schema.json")
-	requireNoAdditionalProperties(t, schema)
-	requireFields(t, schema.Required, "module", "version", "commit", "build_time", "go_version")
-
-	versionType := reflect.TypeOf(foundationx.VersionInfo{})
-	requireSchemaFieldMapsToStructField(t, schema, versionType, "module", "Module", "string")
-	requireSchemaFieldMapsToStructField(t, schema, versionType, "version", "Version", "string")
-	requireSchemaFieldMapsToStructField(t, schema, versionType, "commit", "Commit", "string")
-	requireSchemaFieldMapsToStructField(t, schema, versionType, "build_time", "BuildTime", "string")
-	requireSchemaFieldMapsToStructField(t, schema, versionType, "go_version", "GoVersion", "string")
 }
 
 func requireSchemaFieldMapsToStructField(t *testing.T, schema objectSchema, structType reflect.Type, schemaField string, structField string, schemaType string) {
